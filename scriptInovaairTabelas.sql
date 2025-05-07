@@ -92,14 +92,6 @@ CREATE TABLE IF NOT EXISTS captura_alerta (
   CONSTRAINT fk_alerta_metrica FOREIGN KEY (fkMetrica) REFERENCES metrica (idMetrica)
 );
 
-CREATE TABLE IF NOT EXISTS captura_historico (
-  idCapturaHistorico INT PRIMARY KEY AUTO_INCREMENT,
-  valorCapturado FLOAT NOT NULL,
-  momento DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  fkMetrica INT NOT NULL,
-  CONSTRAINT fk_historico_metrica FOREIGN KEY (fkMetrica) REFERENCES metrica (idMetrica)
-);
-
 INSERT INTO cliente (razaoSocial, cnpj, email, telefone) VALUES
 ('InnovaAir', '12345678000188', 'inovaair@technology.com', '1133224455'),
 ('TAM LINHAS AÉREAS S.A. A LATAM', '12345678000188', 'contato@latam.com.br', '1133224455');
@@ -143,7 +135,7 @@ desc captura_historico;
 select * from captura_historico;
 SELECT razaoSocial, idFilial, idMaquina, componente, especificacao, metrica, valorCapturado, momento from maquina join componente on idMaquina = fkMaquina join metrica on idComponente = fkComponente join captura_historico on idMetrica = fkMetrica join filial on idFilial = fkFilial join cliente on idCliente = fkCliente;
 # Trigger para inserir os alertas
-
+select * from captura_alerta;
 
 
 
@@ -190,3 +182,5 @@ SELECT valorCapturado, momento, metrica, limiteMaximo, limiteMinimo, componente,
         ON fkFilial = idFilial
         JOIN cliente on idCliente = filial.fkCliente    
         WHERE usuario.email = '' AND senha = 'Senha123@';
+
+SELECT idComponente, componente, metrica, idMetrica, case when limiteMinimo is null then 2147000000 else limiteMinimo end as limiteMinimo, case when limiteMaximo is null then 2147000000 else limiteMaximo end as limiteMaximo, terminal, setor, idMaquina from componente join maquina on idMaquina = fkMaquina join metrica on idComponente = fkComponente join filial on idFilial = fkFilial where idMaquina = 1;
