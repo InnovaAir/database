@@ -8,6 +8,7 @@ grant select, insert on innovaair.maquina to 'innova_client'@'%';
 grant select, insert on innovaair.componente to 'innova_client'@'%';
 grant select, insert on innovaair.metrica to 'innova_client'@'%';
 grant insert on innovaair.captura_historico to 'innova_client'@'%';
+grant insert on innovaair.captura_alerta to 'innova_client'@'%';
 
 create user 'innova_s3'@'%' identified by 'Innovaair@123';
 
