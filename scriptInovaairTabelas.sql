@@ -108,11 +108,6 @@ INSERT INTO usuario VALUES
 (default, 'Estela', 'estela@latam.com', 'Senha123@', 2, 3),
 (default, 'Kátia', 'katia@latam.com', 'Senha123@', 2, 4);
 
-INSERT INTO usuarioFilial VALUES
-(2, 1),
-(3, 1),
-(4, 1);
-
 INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, estado, regiao) VALUES
 ('09560-850', 'Rod. Hélio Smidt', '1', 'Terminal 1', 'Cumbica', 'Guarulhos', 'SP', 'Sudeste'),  -- Aeroporto de GRU
 ('21041-253', 'Av. Vinte de Janeiro', 's/n', 'Terminal Principal', 'Galeão', 'Rio de Janeiro', 'RJ', 'Sudeste'),  -- Galeão
@@ -127,60 +122,51 @@ INSERT INTO filial (terminal, setor, fkCliente, fkEndereco) VALUES
 ('Principal - Afonso Pena', 'Segurança', 2, 4),  -- Curitiba
 ('Salgado Filho', 'Operações', 2, 5);  -- Porto Alegre
 
-SELECT * from maquina;
-SELECT * from componente;
-SELECT * from metrica;
-SELECT idComponente, componente, metrica, limiteMinimo, limiteMaximo, idMetrica from componente join maquina on idMaquina = fkMaquina join metrica on idComponente = fkComponente where idMaquina = 1;
-desc captura_historico;
-select * from captura_historico;
-SELECT razaoSocial, idFilial, idMaquina, componente, especificacao, metrica, valorCapturado, momento from maquina join componente on idMaquina = fkMaquina join metrica on idComponente = fkComponente join captura_historico on idMetrica = fkMetrica join filial on idFilial = fkFilial join cliente on idCliente = fkCliente;
-# Trigger para inserir os alertas
-select * from captura_alerta;
+INSERT INTO usuarioFilial VALUES
+(2,1);
 
-
-
-
-
-
-
-DELIMITER //
-CREATE TRIGGER after_insert_captura
-AFTER INSERT ON captura_historico
-FOR EACH ROW
-BEGIN
-    DECLARE v_limite_max INT;
-    DECLARE v_limite_min INT;
-
-    -- Busca o limiteMaximo da métrica correspondente
-    SELECT limiteMaximo, limiteMinimo
-    INTO v_limite_max, v_limite_min
-    FROM metrica
-    WHERE idMetrica = NEW.fkMetrica;
-    
-    -- Se o valor da nova captura for maior que o limite, cria alerta
-    IF NEW.valorCapturado > v_limite_max THEN
-        INSERT INTO captura_alerta (valorCapturado, momento, fkMetrica, gravidade)
-        VALUES (NEW.valorCapturado, NOW(), NEW.fkMetrica, 'Crítico');
-    ELSEIF NEW.valorCapturado >= ((v_limite_min + v_limite_max)/2) and NEW.valorCapturado < v_limite_max THEN
-		INSERT INTO captura_alerta (valorCapturado, momento, fkMetrica, gravidade)
-        VALUES (NEW.valorCapturado, NOW(), NEW.fkMetrica, 'Alto');
-    ELSEIF NEW.valorCapturado < ((v_limite_min + v_limite_min)/2) and NEW.valorCapturado > v_limite_min THEN
-		INSERT INTO captura_alerta (valorCapturado, momento, fkMetrica, gravidade)
-        VALUES (NEW.valorCapturado, NOW(), NEW.fkMetrica, 'Baixo');   
-	ELSE 
-		INSERT INTO captura_alerta (valorCapturado, momento, fkMetrica, gravidade)
-        VALUES (NEW.valorCapturado, NOW(), NEW.fkMetrica, 'Nenhuma');
-    END IF;
-END//
-# DELIMITER;
-
-SELECT valorCapturado, momento, metrica, limiteMaximo, limiteMinimo, componente, especificacao, fkFilial from captura_historico join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on fkFilial = idFilial;
-       SELECT idUsuario, filial.fkCliente, fkCargo, idFilial FROM usuario
-        JOIN usuarioFilial
-        ON fkUsuario = idUsuario
-        JOIN filial
-        ON fkFilial = idFilial
-        JOIN cliente on idCliente = filial.fkCliente    
-        WHERE usuario.email = '' AND senha = 'Senha123@';
-
-SELECT idComponente, componente, metrica, idMetrica, case when limiteMinimo is null then 2147000000 else limiteMinimo end as limiteMinimo, case when limiteMaximo is null then 2147000000 else limiteMaximo end as limiteMaximo, terminal, setor, idMaquina from componente join maquina on idMaquina = fkMaquina join metrica on idComponente = fkComponente join filial on idFilial = fkFilial where idMaquina = 1;
+CREATE VIEW dashRobertoModelos as
+SELECT 
+    todas_combinacoes.gravidade,
+    COALESCE(COUNT(captura_alerta.idCapturaAlerta), 0) as qtdAlertas,
+    todas_combinacoes.especificacao,
+    todas_combinacoes.componente,
+    todas_combinacoes.terminal
+FROM (
+    -- Subconsulta que gera todas as combinações possíveis
+    SELECT DISTINCT 
+        gravidades.gravidade,
+        especificacao,
+        componente,
+        terminal
+    FROM (
+        SELECT 'baixo' as gravidade
+        UNION SELECT 'alto' as gravidade
+        UNION SELECT 'critico' as gravidade
+    ) gravidades
+    CROSS JOIN metrica m
+    CROSS JOIN componente c
+    CROSS JOIN maquina ma
+    JOIN filial f ON ma.fkFilial = f.idFilial
+    JOIN usuarioFilial uf ON uf.fkFilial = f.idFilial
+    JOIN usuario u ON uf.fkUsuario = u.idUsuario
+    WHERE u.idUsuario = 2
+) todas_combinacoes
+LEFT JOIN (
+    captura_alerta 
+    JOIN metrica ON fkMetrica = idMetrica 
+    JOIN componente ON fkComponente = idComponente 
+    JOIN maquina ON fkMaquina = idMaquina 
+    JOIN filial ON maquina.fkFilial = idFilial 
+    JOIN usuarioFilial ON usuarioFilial.fkFilial = idFilial 
+    JOIN usuario ON fkUsuario = idUsuario
+) ON todas_combinacoes.gravidade = captura_alerta.gravidade
+   AND todas_combinacoes.especificacao = componente.especificacao
+   AND todas_combinacoes.componente = componente.componente  
+   AND todas_combinacoes.terminal = filial.terminal
+   AND usuario.idUsuario = 2
+GROUP BY 
+    todas_combinacoes.gravidade, 
+    todas_combinacoes.especificacao, 
+    todas_combinacoes.terminal, 
+    todas_combinacoes.componente;
