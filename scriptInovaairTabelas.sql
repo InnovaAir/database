@@ -125,14 +125,16 @@ INSERT INTO filial (terminal, setor, fkCliente, fkEndereco) VALUES
 INSERT INTO usuarioFilial VALUES
 (2,1),
 (2,2);
+
 CREATE VIEW dashRobertoModelos as
-SELECT 
+SELECT
     todas_combinacoes.gravidade,
     COALESCE(COUNT(captura_alerta.idCapturaAlerta), 0) as qtdAlertas,
     todas_combinacoes.especificacao,
     todas_combinacoes.componente,
     todas_combinacoes.terminal,
-    WEEK(captura_alerta.momento) as semanas
+    WEEK(captura_alerta.momento) as semanas,
+    idUsuario
 FROM (
     -- Subconsulta que gera todas as combinações possíveis
     SELECT DISTINCT 
@@ -151,7 +153,6 @@ FROM (
     JOIN filial f ON ma.fkFilial = f.idFilial
     JOIN usuarioFilial uf ON uf.fkFilial = f.idFilial
     JOIN usuario u ON uf.fkUsuario = u.idUsuario
-    WHERE u.idUsuario = 2
 ) todas_combinacoes
 LEFT JOIN (
     captura_alerta 
@@ -165,10 +166,11 @@ LEFT JOIN (
    AND todas_combinacoes.especificacao = componente.especificacao
    AND todas_combinacoes.componente = componente.componente  
    AND todas_combinacoes.terminal = filial.terminal
-      where  captura_alerta.momento >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+   AND captura_alerta.momento >= DATE_SUB(NOW(), INTERVAL 30 DAY)
 GROUP BY 
     todas_combinacoes.gravidade, 
     todas_combinacoes.especificacao, 
     todas_combinacoes.terminal, 
     todas_combinacoes.componente,
-    semanas;
+    semanas,
+	idUsuario;
