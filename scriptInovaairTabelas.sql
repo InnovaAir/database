@@ -1,4 +1,4 @@
--- DROP DATABASE innovaair;
+# DROP DATABASE innovaair;
 
 CREATE DATABASE IF NOT EXISTS innovaair;
 USE innovaair;
