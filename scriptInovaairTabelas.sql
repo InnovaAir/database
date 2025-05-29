@@ -251,6 +251,6 @@ GROUP BY
     todas_combinacoes.componente,
     semanas,
 	idUsuario;
-    
+
 -- SELECT LETÍCIA
-select valorPrevisto, isPrevisao, gravidade, momento, componente from dados_previsao join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente limit 35040;
+select valorPrevisto, isPrevisao, gravidade, momento, componente from dados_previsao join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente where componente = "RAM" or componente = "Processador" limit 2452800;
