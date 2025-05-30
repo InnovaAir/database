@@ -204,53 +204,8 @@ INSERT INTO metrica (metrica, limiteMinimo, limiteMaximo, fkComponente) VALUES
 
 -- VIEW LUCAS
 CREATE VIEW dashRobertoModelos as
-SELECT
-    todas_combinacoes.gravidade,
-    COALESCE(COUNT(captura_alerta.idCapturaAlerta), 0) as qtdAlertas,
-    todas_combinacoes.especificacao,
-    todas_combinacoes.componente,
-    todas_combinacoes.terminal,
-    WEEK(captura_alerta.momento) as semanas,
-    idUsuario
-FROM (
-    -- Subconsulta que gera todas as combinações possíveis
-    SELECT DISTINCT 
-        gravidades.gravidade,
-        especificacao,
-        componente,
-        terminal
-    FROM (
-        SELECT 'baixo' as gravidade
-        UNION SELECT 'alto' as gravidade
-        UNION SELECT 'critico' as gravidade
-    ) gravidades
-    CROSS JOIN metrica m
-    CROSS JOIN componente c
-    CROSS JOIN maquina ma
-    JOIN filial f ON ma.fkFilial = f.idFilial
-    JOIN usuarioFilial uf ON uf.fkFilial = f.idFilial
-    JOIN usuario u ON uf.fkUsuario = u.idUsuario
-) todas_combinacoes
-LEFT JOIN (
-    captura_alerta 
-    JOIN metrica ON fkMetrica = idMetrica 
-    JOIN componente ON fkComponente = idComponente 
-    JOIN maquina ON fkMaquina = idMaquina 
-    JOIN filial ON maquina.fkFilial = idFilial 
-    JOIN usuarioFilial ON usuarioFilial.fkFilial = idFilial 
-    JOIN usuario ON fkUsuario = idUsuario
-) ON todas_combinacoes.gravidade = captura_alerta.gravidade
-   AND todas_combinacoes.especificacao = componente.especificacao
-   AND todas_combinacoes.componente = componente.componente  
-   AND todas_combinacoes.terminal = filial.terminal
-   AND captura_alerta.momento >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-GROUP BY 
-    todas_combinacoes.gravidade, 
-    todas_combinacoes.especificacao, 
-    todas_combinacoes.terminal, 
-    todas_combinacoes.componente,
-    semanas,
-	idUsuario;
+select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina;
 
 -- VIEW GUILHERME
 CREATE VIEW dashRobertoDesempenho as
