@@ -202,7 +202,7 @@ INSERT INTO metrica (metrica, limiteMinimo, limiteMaximo, fkComponente) VALUES
 ('velocidadeUpload', 20, 135, 36), ('velocidadeDownload', 30, 235, 36),
 ('velocidadeUpload', 10, 115, 40), ('velocidadeDownload', 20, 215, 40);
 
-
+-- VIEW LUCAS
 CREATE VIEW dashRobertoModelos as
 SELECT
     todas_combinacoes.gravidade,
@@ -251,6 +251,25 @@ GROUP BY
     todas_combinacoes.componente,
     semanas,
 	idUsuario;
+
+-- VIEW GUILHERME
+CREATE VIEW dashRobertoDesempenho as
+SELECT
+      m.hostname AS totem,
+      f.terminal AS terminal,
+      u.Idusuario as usuario,
+      SUM(CASE WHEN ca.gravidade = 'critico' THEN 1 ELSE 0 END) AS critico,
+      SUM(CASE WHEN ca.gravidade = 'alto' THEN 1 ELSE 0 END) AS alto,
+      SUM(CASE WHEN ca.gravidade = 'baixo' THEN 1 ELSE 0 END) AS baixo,
+      SUM(CASE WHEN ca.gravidade IN ('critico', 'alto', 'baixo') THEN 1 ELSE 0 END) AS total_alertas
+    FROM maquina m
+    JOIN filial f ON m.fkFilial = f.idFilial
+    LEFT JOIN componente c ON c.fkMaquina = m.idMaquina
+    LEFT JOIN metrica me ON me.fkComponente = c.idComponente
+    join usuarioFilial uf on uf.fkFilial = idfilial
+    join usuario u on uf.fkUsuario = u.idUsuario
+    LEFT JOIN captura_alerta ca ON ca.fkMetrica = me.idMetrica AND ca.momento >= NOW() - INTERVAL 1 DAY
+    GROUP BY totem, terminal, usuario;
 
 -- SELECT LETÍCIA
 select valorPrevisto, isPrevisao, gravidade, momento, componente from dados_previsao join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente where componente = "RAM" or componente = "Processador" limit 2452800;
