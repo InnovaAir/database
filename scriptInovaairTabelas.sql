@@ -270,3 +270,41 @@ INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUE
 -- DROP TABLE captura_alerta;
 
 SELECT * FROM captura_alerta;
+
+-- Total de alertas dos ultimos 3 meses
+SELECT COUNT(*) AS total_alertas_cpu_ultimo_mes
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND c.componente = 'RAM'
+  AND ca.momento >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH);
+
+SELECT 
+  MONTH(ca.momento) AS mes,
+  YEAR(ca.momento) AS ano,
+  COUNT(*) AS total_alertas
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND c.componente = 'RAM'
+  AND ca.momento BETWEEN '2025-03-01' AND '2025-05-31'
+GROUP BY YEAR(ca.momento), MONTH(ca.momento)
+ORDER BY ano, mes;
+
+-- Ultimos 3 mêses
+CREATE OR REPLACE VIEW view_alertas_ultimos_3_meses AS
+SELECT 
+  DATE_FORMAT(ca.momento, '%M %Y') AS mes,
+  COUNT(*) AS total_alertas
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND c.componente = 'RAM'
+  AND ca.momento >= DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH), '%Y-%m-01')
+  AND ca.momento <  DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')
+GROUP BY mes;
+
+SELECT * FROM view_alertas_ultimos_3_meses;
