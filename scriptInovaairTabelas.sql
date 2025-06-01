@@ -92,18 +92,6 @@ CREATE TABLE IF NOT EXISTS captura_alerta (
   CONSTRAINT fk_alerta_metrica FOREIGN KEY (fkMetrica) REFERENCES metrica (idMetrica)
 );
 
-CREATE TABLE IF NOT EXISTS dados_previsao (
-  idPrevisao INT PRIMARY KEY AUTO_INCREMENT,
-  valorPrevisto FLOAT NOT NULL,
-  isPrevisao TINYINT NOT NULL,
-  gravidade VARCHAR(20) NOT NULL,
-  momento DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  fkMetrica INT NOT NULL,
-  CONSTRAINT fk_previs_metrica FOREIGN KEY (fkMetrica) REFERENCES metrica (idMetrica)
-);
-
-SELECT * FROM dados_previsao;
-
 INSERT INTO cliente (razaoSocial, cnpj, email, telefone) VALUES
 ('InnovaAir', '12345678000188', 'inovaair@technology.com', '1133224455'),
 ('TAM LINHAS AÉREAS S.A. A LATAM', '12345678000188', 'contato@latam.com.br', '1133224455');
@@ -226,5 +214,59 @@ SELECT
     LEFT JOIN captura_alerta ca ON ca.fkMetrica = me.idMetrica AND ca.momento >= NOW() - INTERVAL 1 DAY
     GROUP BY totem, terminal, usuario;
 
--- SELECT LETÍCIA
-select valorPrevisto, isPrevisao, gravidade, momento, componente from dados_previsao join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente where componente = "RAM" or componente = "Processador" limit 2452800;
+-- DADOS SIMULADOS
+INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
+(71.0, '2025-03-01 08:00:00', 'baixa', 1),
+(70.5, '2025-03-02 09:00:00', 'baixa', 1),
+(70.2, '2025-03-03 10:00:00', 'baixa', 1),
+(71.3, '2025-03-04 11:00:00', 'baixa', 1),
+(72.0, '2025-03-05 12:00:00', 'baixa', 1),
+(70.9, '2025-03-06 13:00:00', 'baixa', 1),
+(71.7, '2025-03-07 14:00:00', 'baixa', 1),
+(72.5, '2025-03-08 15:00:00', 'baixa', 1),
+(70.3, '2025-03-09 16:00:00', 'baixa', 1),
+(73.0, '2025-03-10 17:00:00', 'baixa', 1),
+(71.1, '2025-03-11 08:00:00', 'baixa', 1),
+(72.4, '2025-04-12 09:00:00', 'baixa', 1),
+(71.6, '2025-04-13 10:00:00', 'baixa', 1),
+(70.8, '2025-04-14 11:00:00', 'baixa', 1),
+(73.5, '2025-04-15 12:00:00', 'baixa', 1),
+(71.2, '2025-05-16 13:00:00', 'baixa', 1),
+(70.7, '2025-05-17 14:00:00', 'baixa', 1),
+(72.3, '2025-05-18 15:00:00', 'baixa', 1),
+(71.4, '2025-05-19 16:00:00', 'baixa', 1),
+(75.6, '2025-05-20 17:00:00', 'baixa', 1),
+(88.5, '2025-03-21 08:00:00', 'alta', 1),
+(89.0, '2025-03-22 09:00:00', 'alta', 1),
+(87.0, '2025-03-23 10:00:00', 'alta', 1),
+(90.0, '2025-03-24 11:00:00', 'alta', 1),
+(89.5, '2025-03-25 12:00:00', 'alta', 1),
+(88.7, '2025-03-26 13:00:00', 'alta', 1),
+(86.0, '2025-03-27 14:00:00', 'alta', 1),
+(87.3, '2025-03-28 15:00:00', 'alta', 1),
+(88.2, '2025-03-29 16:00:00', 'alta', 1),
+(89.7, '2025-03-30 17:00:00', 'alta', 1),
+(85.0, '2025-03-31 08:00:00', 'alta', 1),
+(88.1, '2025-04-01 09:00:00', 'alta', 1),
+(89.3, '2025-04-02 10:00:00', 'alta', 1),
+(86.5, '2025-04-03 11:00:00', 'alta', 1),
+(90.0, '2025-04-04 12:00:00', 'alta', 1),
+(87.5, '2025-04-05 13:00:00', 'alta', 1),
+(88.8, '2025-04-06 14:00:00', 'alta', 1),
+(89.9, '2025-04-07 15:00:00', 'alta', 1),
+(86.2, '2025-05-08 16:00:00', 'alta', 1),
+(87.9, '2025-05-09 17:00:00', 'alta', 1),
+(88.0, '2025-05-10 08:00:00', 'alta', 1),
+(89.4, '2025-05-11 09:00:00', 'alta', 1),
+(86.9, '2025-05-12 10:00:00', 'alta', 1),
+(91.0, '2025-03-13 11:00:00', 'critico', 1),
+(92.3, '2025-03-14 12:00:00', 'critico', 1),
+(95.0, '2025-04-15 13:00:00', 'critico', 1),
+(93.4, '2025-04-16 14:00:00', 'critico', 1),
+(94.7, '2025-05-17 15:00:00', 'critico', 1),
+(96.2, '2025-05-18 16:00:00', 'critico', 1),
+(98.0, '2025-05-19 17:00:00', 'critico', 1);
+
+-- DROP TABLE captura_alerta;
+
+SELECT * FROM captura_alerta;
