@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS endereco (
   cep CHAR(9) NOT NULL,
   logradouro VARCHAR(100) NOT NULL,
   numero VARCHAR(45) NOT NULL,
-  complemento VARCHAR(45),
+  aeroporto VARCHAR(45),
   bairro VARCHAR(45) NOT NULL,
   cidade VARCHAR(45) NOT NULL,
   estado VARCHAR(45) NOT NULL,
@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS maquina (
   numeroSerial VARCHAR(45) NOT NULL,
   enderecoMac VARCHAR(45) NOT NULL,
   hostname VARCHAR(45) NOT NULL,
+  modelo VARCHAR(45) NOT NULL,
   CONSTRAINT filialMaquina FOREIGN KEY (fkFilial) REFERENCES filial(idFilial)
 );
 
@@ -108,37 +109,39 @@ INSERT INTO usuario VALUES
 (default, 'Estela', 'estela@latam.com', 'Senha123@', 2, 3),
 (default, 'Kátia', 'katia@latam.com', 'Senha123@', 2, 4);
 
-INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, estado, regiao) VALUES
-('09560-850', 'Rod. Hélio Smidt', '1', 'Terminal 1', 'Cumbica', 'Guarulhos', 'SP', 'Sudeste'),  -- Aeroporto de GRU
-('21041-253', 'Av. Vinte de Janeiro', 's/n', 'Terminal Principal', 'Galeão', 'Rio de Janeiro', 'RJ', 'Sudeste'),  -- Galeão
-('31742-010', 'Av. Carlos Drummond', '5.600', 'Terminal 2', 'Confins', 'Belo Horizonte', 'MG', 'Sudeste'),  -- Confins
-('81530-900', 'Av. Rocha Pombo', 's/n', 'Terminal de Passageiros', 'Água Verde', 'Curitiba', 'PR', 'Sul'),  -- Afonso Pena
-('91010-971', 'Av. Severo Dulius', '9000', 'Terminal 1', 'São João', 'Porto Alegre', 'RS', 'Sul'); -- Salgado Filho
+INSERT INTO endereco (cep, logradouro, numero, aeroporto, bairro, cidade, estado, regiao) VALUES
+('09560-850', 'Rod. Hélio Smidt', '1', 'GRU', 'Cumbica', 'Guarulhos', 'SP', 'Sudeste'),  -- Aeroporto de GRU
+('21041-253', 'Av. Vinte de Janeiro', 's/n', 'GRU', 'Galeão', 'Rio de Janeiro', 'RJ', 'Sudeste'),  -- Galeão
+('31742-010', 'Av. Carlos Drummond', '5.600', 'GALEÃO', 'de Confins', 'Belo Horizonte', 'MG', 'Sudeste'),  -- Confins
+('81530-900', 'Av. Rocha Pombo', 's/n', 'Afonso Pena', 'Água Verde', 'Curitiba', 'PR', 'Sul'),  -- Afonso Pena
+('91010-971', 'Av. Severo Dulius', '9000', 'Salgado Filho', 'São João', 'Porto Alegre', 'RS', 'Sul'); -- Salgado Filho
 
 INSERT INTO filial (terminal, setor, fkCliente, fkEndereco) VALUES
-('GRU', 'Embarque Internacional', 2, 1),  -- GRU
-('Galeão', 'Carga Aérea', 2, 2),  -- Galeão
-('de Confins', 'Administrativo', 2, 3),  -- Confins
-('Principal - Afonso Pena', 'Segurança', 2, 4),  -- Curitiba
-('Salgado Filho', 'Operações', 2, 5);  -- Porto Alegre
+('1', 'Embarque Internacional', 2, 1),  -- GRU
+('2', 'Carga Aérea', 2, 2),  -- Galeão
+('3', 'Administrativo', 2, 3),  -- Confins
+('4', 'Segurança', 2, 4),  -- Curitiba
+('5', 'Operações', 2, 5);  -- Porto Alegre
 
 INSERT INTO usuarioFilial VALUES
 (2,1),
 (2,2),
 (3,1),
-(3,2);
+(3,3),
+(4,4),
+(4,5);
 
-INSERT INTO maquina (fkFilial, numeroSerial, enderecoMac, hostname) VALUES
-(1, 'SN1001', '00:1A:2B:3C:4D:5E', 'maquina-1'),
-(2, 'SN1002', '00:1A:2B:3C:4D:5F', 'maquina-2'),
-(1, 'SN1003', '00:1A:2B:3C:4D:60', 'maquina-3'),
-(2, 'SN1004', '00:1A:2B:3C:4D:61', 'maquina-4'),
-(1, 'SN1005', '00:1A:2B:3C:4D:62', 'maquina-5'),
-(2, 'SN1006', '00:1A:2B:3C:4D:63', 'maquina-6'),
-(1, 'SN1007', '00:1A:2B:3C:4D:64', 'maquina-7'),
-(2, 'SN1008', '00:1A:2B:3C:4D:65', 'maquina-8'),
-(1, 'SN1009', '00:1A:2B:3C:4D:66', 'maquina-9'),
-(2, 'SN1010', '00:1A:2B:3C:4D:67', 'maquina-10');
+INSERT INTO maquina (fkFilial, numeroSerial, enderecoMac, hostname, modelo) VALUES
+(1, 'SN1001', '00:1A:2B:3C:4D:5E', 'maquina-1', 'ABC'),
+(1, 'SN1002', '00:1A:2B:3C:4D:5F', 'maquina-2', 'ABC'),
+(2, 'SN1003', '00:1A:2B:3C:4D:60', 'maquina-3', 'ABC'),
+(2, 'SN1004', '00:1A:2B:3C:4D:61', 'maquina-4', 'DEF'),
+(3, 'SN1005', '00:1A:2B:3C:4D:62', 'maquina-5', 'DEF'),
+(3, 'SN1006', '00:1A:2B:3C:4D:63', 'maquina-6', 'DEF'),
+(4, 'SN1007', '00:1A:2B:3C:4D:64', 'maquina-7', 'GHI'),
+(4, 'SN1008', '00:1A:2B:3C:4D:65', 'maquina-8', 'GHI'),
+(5, 'SN1009', '00:1A:2B:3C:4D:66', 'maquina-9', 'GHI'),
+(5, 'SN1010', '00:1A:2B:3C:4D:67', 'maquina-10', 'XYZ');
 
 -- Inserir componentes (4 por máquina)
 INSERT INTO componente (fkMaquina, componente, especificacao) VALUES
@@ -215,115 +218,6 @@ SELECT
     join usuario u on uf.fkUsuario = u.idUsuario
     LEFT JOIN captura_alerta ca ON ca.fkMetrica = me.idMetrica AND ca.momento >= NOW() - INTERVAL 1 DAY
     GROUP BY totem, terminal, usuario;
-
--- DADOS SIMULADOS
-INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
-(71.0, '2025-03-01 08:00:00', 'baixa', 1),
-(70.5, '2025-03-02 09:00:00', 'baixa', 1),
-(70.2, '2025-03-03 10:00:00', 'baixa', 1),
-(71.3, '2025-03-04 11:00:00', 'baixa', 1),
-(72.0, '2025-03-05 12:00:00', 'baixa', 1),
-(70.9, '2025-03-06 13:00:00', 'baixa', 1),
-(71.7, '2025-03-07 14:00:00', 'baixa', 1),
-(72.5, '2025-03-08 15:00:00', 'baixa', 1),
-(70.3, '2025-03-09 16:00:00', 'baixa', 1),
-(73.0, '2025-03-10 17:00:00', 'baixa', 1),
-(71.1, '2025-03-11 08:00:00', 'baixa', 1),
-(72.4, '2025-04-12 09:00:00', 'baixa', 1),
-(71.6, '2025-04-13 10:00:00', 'baixa', 1),
-(70.8, '2025-04-14 11:00:00', 'baixa', 1),
-(73.5, '2025-04-15 12:00:00', 'baixa', 1),
-(71.2, '2025-05-16 13:00:00', 'baixa', 1),
-(70.7, '2025-05-17 14:00:00', 'baixa', 1),
-(72.3, '2025-05-18 15:00:00', 'baixa', 1),
-(71.4, '2025-05-19 16:00:00', 'baixa', 1),
-(75.6, '2025-05-20 17:00:00', 'baixa', 1),
-(88.5, '2025-03-21 08:00:00', 'alta', 1),
-(89.0, '2025-03-22 09:00:00', 'alta', 1),
-(87.0, '2025-03-23 10:00:00', 'alta', 1),
-(90.0, '2025-03-24 11:00:00', 'alta', 1),
-(89.5, '2025-03-25 12:00:00', 'alta', 1),
-(88.7, '2025-03-26 13:00:00', 'alta', 1),
-(86.0, '2025-03-27 14:00:00', 'alta', 1),
-(87.3, '2025-03-28 15:00:00', 'alta', 1),
-(88.2, '2025-03-29 16:00:00', 'alta', 1),
-(89.7, '2025-03-30 17:00:00', 'alta', 1),
-(85.0, '2025-03-31 08:00:00', 'alta', 1),
-(88.1, '2025-04-01 09:00:00', 'alta', 1),
-(89.3, '2025-04-02 10:00:00', 'alta', 1),
-(86.5, '2025-04-03 11:00:00', 'alta', 1),
-(90.0, '2025-04-04 12:00:00', 'alta', 1),
-(87.5, '2025-04-05 13:00:00', 'alta', 1),
-(88.8, '2025-04-06 14:00:00', 'alta', 1),
-(89.9, '2025-04-07 15:00:00', 'alta', 1),
-(86.2, '2025-05-08 16:00:00', 'alta', 1),
-(87.9, '2025-05-09 17:00:00', 'alta', 1),
-(88.0, '2025-05-10 08:00:00', 'alta', 1),
-(89.4, '2025-05-11 09:00:00', 'alta', 1),
-(86.9, '2025-05-12 10:00:00', 'alta', 1),
-(91.0, '2025-03-13 11:00:00', 'critico', 1),
-(92.3, '2025-03-14 12:00:00', 'critico', 1),
-(95.0, '2025-04-15 13:00:00', 'critico', 1),
-(93.4, '2025-04-16 14:00:00', 'critico', 1),
-(94.7, '2025-05-17 15:00:00', 'critico', 1),
-(96.2, '2025-05-18 16:00:00', 'critico', 1),
-(98.0, '2025-05-19 17:00:00', 'critico', 1);
-
---  CPU
-INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
-(75.0, '2025-03-01 08:00:00', 'baixa', 11),
-(76.5, '2025-03-02 09:00:00', 'baixa', 11),
-(76.2, '2025-03-03 10:00:00', 'baixa', 11),
-(75.3, '2025-03-04 11:00:00', 'baixa', 11),
-(76.0, '2025-03-05 12:00:00', 'baixa', 11),
-(77.9, '2025-03-06 13:00:00', 'baixa', 11),
-(79.7, '2025-03-07 14:00:00', 'baixa', 11),
-(78.5, '2025-03-08 15:00:00', 'baixa', 11),
-(79.3, '2025-04-09 16:00:00', 'baixa', 11),
-(78.0, '2025-04-10 17:00:00', 'baixa', 11),
-(79.1, '2025-04-11 08:00:00', 'baixa', 11),
-(79.4, '2025-04-12 09:00:00', 'baixa', 11),
-(78.6, '2025-04-13 10:00:00', 'baixa', 11),
-(75.8, '2025-05-14 11:00:00', 'baixa', 11),
-(79.5, '2025-05-15 12:00:00', 'baixa', 11),
-(77.2, '2025-05-16 13:00:00', 'baixa', 11),
-(77.7, '2025-05-17 14:00:00', 'baixa', 11),
-(76.3, '2025-05-18 15:00:00', 'baixa', 11),
-(76.4, '2025-05-19 16:00:00', 'baixa', 11),
-(79.6, '2025-05-20 17:00:00', 'baixa', 11),
-(89.5, '2025-03-21 08:00:00', 'alta', 11),
-(88.0, '2025-03-22 09:00:00', 'alta', 11),
-(86.0, '2025-03-23 10:00:00', 'alta', 11),
-(97.0, '2025-03-24 11:00:00', 'alta', 11),
-(89.5, '2025-03-25 12:00:00', 'alta', 11),
-(87.7, '2025-03-26 13:00:00', 'alta', 11),
-(87.0, '2025-03-27 14:00:00', 'alta', 11),
-(88.3, '2025-03-28 15:00:00', 'alta', 11),
-(89.2, '2025-03-29 16:00:00', 'alta', 11),
-(90.7, '2025-03-30 17:00:00', 'alta', 11),
-(86.0, '2025-03-31 08:00:00', 'alta', 11),
-(89.1, '2025-03-01 09:00:00', 'alta', 11),
-(90.3, '2025-03-02 10:00:00', 'alta', 11),
-(87.5, '2025-04-03 11:00:00', 'alta', 11),
-(91.0, '2025-04-04 12:00:00', 'alta', 11),
-(88.5, '2025-04-05 13:00:00', 'alta', 11),
-(89.8, '2025-04-06 14:00:00', 'alta', 11),
-(90.9, '2025-05-07 15:00:00', 'alta', 11),
-(87.2, '2025-05-08 16:00:00', 'alta', 11),
-(88.9, '2025-05-09 17:00:00', 'alta', 11),
-(89.0, '2025-05-10 08:00:00', 'alta', 11),
-(90.4, '2025-05-11 09:00:00', 'alta', 11),
-(87.9, '2025-05-12 10:00:00', 'alta', 11),
-(92.0, '2025-05-13 11:00:00', 'critico', 11),
-(93.3, '2025-03-14 12:00:00', 'critico', 11),
-(96.0, '2025-04-15 13:00:00', 'critico', 11),
-(94.4, '2025-04-16 14:00:00', 'critico', 11),
-(95.7, '2025-05-17 15:00:00', 'critico', 11),
-(97.2, '2025-05-18 16:00:00', 'critico', 11),
-(99.0, '2025-05-19 17:00:00', 'critico', 11);
-
-
--- DROP TABLE captura_alerta;
 
 SELECT * FROM captura_alerta;
 
