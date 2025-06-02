@@ -1,4 +1,4 @@
-# DROP DATABASE innovaair;
+DROP DATABASE IF EXISTS innovaair;
 
 CREATE DATABASE IF NOT EXISTS innovaair;
 USE innovaair;
@@ -116,7 +116,7 @@ INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, esta
 ('91010-971', 'Av. Severo Dulius', '9000', 'Terminal 1', 'São João', 'Porto Alegre', 'RS', 'Sul'); -- Salgado Filho
 
 INSERT INTO filial (terminal, setor, fkCliente, fkEndereco) VALUES
-('GRU', 'Embarque Internacional', 1, 1),  -- GRU
+('GRU', 'Embarque Internacional', 2, 1),  -- GRU
 ('Galeão', 'Carga Aérea', 2, 2),  -- Galeão
 ('de Confins', 'Administrativo', 2, 3),  -- Confins
 ('Principal - Afonso Pena', 'Segurança', 2, 4),  -- Curitiba
@@ -124,7 +124,9 @@ INSERT INTO filial (terminal, setor, fkCliente, fkEndereco) VALUES
 
 INSERT INTO usuarioFilial VALUES
 (2,1),
-(2,2);
+(2,2),
+(3,1),
+(3,2);
 
 INSERT INTO maquina (fkFilial, numeroSerial, enderecoMac, hostname) VALUES
 (1, 'SN1001', '00:1A:2B:3C:4D:5E', 'maquina-1'),
@@ -267,6 +269,60 @@ INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUE
 (96.2, '2025-05-18 16:00:00', 'critico', 1),
 (98.0, '2025-05-19 17:00:00', 'critico', 1);
 
+--  CPU
+INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
+(75.0, '2025-03-01 08:00:00', 'baixa', 11),
+(76.5, '2025-03-02 09:00:00', 'baixa', 11),
+(76.2, '2025-03-03 10:00:00', 'baixa', 11),
+(75.3, '2025-03-04 11:00:00', 'baixa', 11),
+(76.0, '2025-03-05 12:00:00', 'baixa', 11),
+(77.9, '2025-03-06 13:00:00', 'baixa', 11),
+(79.7, '2025-03-07 14:00:00', 'baixa', 11),
+(78.5, '2025-03-08 15:00:00', 'baixa', 11),
+(79.3, '2025-04-09 16:00:00', 'baixa', 11),
+(78.0, '2025-04-10 17:00:00', 'baixa', 11),
+(79.1, '2025-04-11 08:00:00', 'baixa', 11),
+(79.4, '2025-04-12 09:00:00', 'baixa', 11),
+(78.6, '2025-04-13 10:00:00', 'baixa', 11),
+(75.8, '2025-05-14 11:00:00', 'baixa', 11),
+(79.5, '2025-05-15 12:00:00', 'baixa', 11),
+(77.2, '2025-05-16 13:00:00', 'baixa', 11),
+(77.7, '2025-05-17 14:00:00', 'baixa', 11),
+(76.3, '2025-05-18 15:00:00', 'baixa', 11),
+(76.4, '2025-05-19 16:00:00', 'baixa', 11),
+(79.6, '2025-05-20 17:00:00', 'baixa', 11),
+(89.5, '2025-03-21 08:00:00', 'alta', 11),
+(88.0, '2025-03-22 09:00:00', 'alta', 11),
+(86.0, '2025-03-23 10:00:00', 'alta', 11),
+(97.0, '2025-03-24 11:00:00', 'alta', 11),
+(89.5, '2025-03-25 12:00:00', 'alta', 11),
+(87.7, '2025-03-26 13:00:00', 'alta', 11),
+(87.0, '2025-03-27 14:00:00', 'alta', 11),
+(88.3, '2025-03-28 15:00:00', 'alta', 11),
+(89.2, '2025-03-29 16:00:00', 'alta', 11),
+(90.7, '2025-03-30 17:00:00', 'alta', 11),
+(86.0, '2025-03-31 08:00:00', 'alta', 11),
+(89.1, '2025-03-01 09:00:00', 'alta', 11),
+(90.3, '2025-03-02 10:00:00', 'alta', 11),
+(87.5, '2025-04-03 11:00:00', 'alta', 11),
+(91.0, '2025-04-04 12:00:00', 'alta', 11),
+(88.5, '2025-04-05 13:00:00', 'alta', 11),
+(89.8, '2025-04-06 14:00:00', 'alta', 11),
+(90.9, '2025-05-07 15:00:00', 'alta', 11),
+(87.2, '2025-05-08 16:00:00', 'alta', 11),
+(88.9, '2025-05-09 17:00:00', 'alta', 11),
+(89.0, '2025-05-10 08:00:00', 'alta', 11),
+(90.4, '2025-05-11 09:00:00', 'alta', 11),
+(87.9, '2025-05-12 10:00:00', 'alta', 11),
+(92.0, '2025-05-13 11:00:00', 'critico', 11),
+(93.3, '2025-03-14 12:00:00', 'critico', 11),
+(96.0, '2025-04-15 13:00:00', 'critico', 11),
+(94.4, '2025-04-16 14:00:00', 'critico', 11),
+(95.7, '2025-05-17 15:00:00', 'critico', 11),
+(97.2, '2025-05-18 16:00:00', 'critico', 11),
+(99.0, '2025-05-19 17:00:00', 'critico', 11);
+
+
 -- DROP TABLE captura_alerta;
 
 SELECT * FROM captura_alerta;
@@ -294,9 +350,10 @@ GROUP BY YEAR(ca.momento), MONTH(ca.momento)
 ORDER BY ano, mes;
 
 -- Ultimos 3 mêses
-CREATE OR REPLACE VIEW view_alertas_ultimos_3_meses AS
+-- RAM
+CREATE OR REPLACE VIEW view_alertas_ultimos_3_meses_ram AS
 SELECT 
-  DATE_FORMAT(ca.momento, '%M %Y') AS mes,
+  DATE_FORMAT(ca.momento, '%M') AS mes,
   COUNT(*) AS total_alertas
 FROM captura_alerta ca
 JOIN metrica m ON ca.fkMetrica = m.idMetrica
@@ -307,4 +364,63 @@ WHERE m.metrica = 'porcentagemUso'
   AND ca.momento <  DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')
 GROUP BY mes;
 
-SELECT * FROM view_alertas_ultimos_3_meses;
+-- CPU
+CREATE OR REPLACE VIEW view_alertas_ultimos_3_meses_cpu AS
+SELECT 
+  DATE_FORMAT(ca.momento, '%M') AS mes,
+  COUNT(*) AS total_alertas
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND c.componente = 'Processador'
+  AND ca.momento >= DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH), '%Y-%m-01')
+  AND ca.momento <  DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')
+GROUP BY mes;
+
+CREATE OR REPLACE VIEW view_alertas_ultimos_3_meses_ram_cpu AS
+SELECT 
+  DATE_FORMAT(ca.momento, '%M') AS mes,
+  SUM(CASE WHEN c.componente = 'RAM' THEN 1 ELSE 0 END) AS total_alertas_ram,
+  SUM(CASE WHEN c.componente = 'Processador' THEN 1 ELSE 0 END) AS total_alertas_cpu
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND ca.momento >= DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH), '%Y-%m-01')
+  AND ca.momento <  DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')
+GROUP BY mes
+ORDER BY 
+  STR_TO_DATE(mes, '%M');
+
+-- Select TODOS 
+SELECT * FROM view_alertas_ultimos_3_meses_ram_cpu;
+
+-- Select Ram
+SELECT * FROM view_alertas_ultimos_3_meses_ram;
+
+-- Select Cpu
+SELECT * FROM view_alertas_ultimos_3_meses_cpu;
+
+-- Select alertas por nivel geral (não utilizado) 
+SELECT gravidade, COUNT(*) AS quantidade_alertas
+FROM captura_alerta
+GROUP BY gravidade;
+
+-- Select alertas por niveis por componente
+SELECT 
+  c.componente AS componente, 
+  ca.gravidade, 
+  COUNT(*) AS quantidade_alertas
+FROM 
+  captura_alerta ca
+JOIN 
+  metrica m ON ca.fkMetrica = m.idMetrica
+JOIN 
+  componente c ON m.fkComponente = c.idComponente
+WHERE 
+  c.componente IN ('Processador', 'RAM')
+GROUP BY 
+  c.componente, ca.gravidade
+ORDER BY 
+  c.componente, ca.gravidade;
