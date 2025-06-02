@@ -318,3 +318,56 @@ GROUP BY
   c.componente, ca.gravidade
 ORDER BY 
   c.componente, ca.gravidade;
+
+/* VIEWS DO FEITOSA */
+CREATE VIEW identificar_enderecos AS
+SELECT e.idEndereco, e.complemento, e.estado, u.idUsuario
+	FROM usuario AS u
+    JOIN usuarioFilial as uf
+    ON uf.fkUsuario = u.idUsuario
+    JOIN filial as f
+    ON uf.fkFilial = f.idFilial
+    JOIN endereco as e
+    ON f.fkEndereco = e.idEndereco;
+
+# Obtem as metricas dos componentes de uma maquina
+CREATE VIEW obter_metrica_componente AS 
+SELECT m.idMetrica, c.Componente, m.limiteMaximo, m.limiteMinimo, maq.idMaquina, m.Metrica, c.fkMaquina
+	FROM metrica as m 
+	JOIN componente as c
+	ON m.fkComponente = c.idComponente
+	JOIN maquina as maq
+	ON c.fkMaquina = maq.idMaquina;
+
+# Obter os totens do Endereco do Usuario
+CREATE VIEW obter_enderecos_usuario AS
+SELECT e.idEndereco, 
+    JSON_OBJECT(
+		'idMaquina', m.idMaquina,
+        'numeroSerial', m.numeroSerial,
+		'enderecoMac', m.enderecoMac,
+        'hostname', m.hostname,
+        'metricas', JSON_OBJECT(
+		'cpu', JSON_OBJECT(
+			'maximo', (SELECT limiteMaximo FROM obter_metrica_componente WHERE Componente = "Processador" and Metrica = "PorcentagemUso" and fkMaquina = m.idMaquina),
+            'minimo', (SELECT limiteMinimo FROM obter_metrica_componente WHERE Componente = "Processador" and Metrica = "PorcentagemUso" and fkMaquina = m.idMaquina)
+            ),
+		'ram', JSON_OBJECT(
+			'maximo', (SELECT limiteMaximo FROM obter_metrica_componente WHERE Componente = "RAM" and Metrica = "PorcentagemUso" and fkMaquina = m.idMaquina),
+            'minimo', (SELECT limiteMinimo FROM obter_metrica_componente WHERE Componente = "RAM" and Metrica = "PorcentagemUso" and fkMaquina = m.idMaquina)
+            ),
+		'disco', JSON_OBJECT(
+			'maximo', (SELECT limiteMaximo FROM obter_metrica_componente WHERE Componente = "Armazenamento" and Metrica = "PorcentagemUso" and fkMaquina = m.idMaquina),
+            'minimo', (SELECT limiteMinimo FROM obter_metrica_componente WHERE Componente = "Armazenamento" and Metrica = "PorcentagemUso" and fkMaquina = m.idMaquina)
+            ),
+		'rede', JSON_OBJECT(
+			'maximo', (SELECT limiteMaximo FROM obter_metrica_componente WHERE Componente = "Rede" and Metrica = "PorcentagemUso" and fkMaquina = m.idMaquina),
+            'minimo', (SELECT limiteMinimo FROM obter_metrica_componente WHERE Componente = "Rede" and Metrica = "PorcentagemUso" and fkMaquina = m.idMaquina)
+            )
+    )
+    ) as totem
+    FROM filial as f
+    JOIN maquina as m
+    ON m.fkFilial = f.idFilial
+    JOIN endereco as e
+    ON f.fkEndereco = e.idEndereco;
