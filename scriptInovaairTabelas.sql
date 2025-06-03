@@ -64,7 +64,6 @@ CREATE TABLE IF NOT EXISTS maquina (
   enderecoMac VARCHAR(45) NOT NULL,
   nomeModelo VARCHAR(45) NOT NULL,
   hostname VARCHAR(45) NOT NULL,
-  modelo VARCHAR(45) NOT NULL,
   CONSTRAINT filialMaquina FOREIGN KEY (fkFilial) REFERENCES filial(idFilial)
 );
 
@@ -131,6 +130,7 @@ INSERT INTO usuarioFilial VALUES
 (3,3),
 (4,4),
 (4,5);
+
 
 INSERT INTO maquina (fkFilial, numeroSerial, enderecoMac, hostname, nomeModelo) VALUES
 (1, 'SN1001', '00:1A:2B:3C:4D:5E', 'maquina-1', 'Asus ExpertCenter'),
@@ -505,7 +505,7 @@ ORDER BY
   c.componente, ca.gravidade;
 /* VIEWS DO FEITOSA */
 CREATE VIEW identificar_enderecos AS
-SELECT e.idEndereco, e.complemento, e.estado, u.idUsuario
+SELECT e.idEndereco, e.aeroporto as complemento, e.estado, u.idUsuario
 	FROM usuario AS u
     JOIN usuarioFilial as uf
     ON uf.fkUsuario = u.idUsuario
@@ -2099,5 +2099,3 @@ INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUE
 (95.7, '2025-05-17 15:00:00', 'critico', 25),
 (97.2, '2025-05-18 16:00:00', 'critico', 25),
 (99.0, '2025-05-19 17:00:00', 'critico', 25);
-
-
