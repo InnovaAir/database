@@ -204,6 +204,7 @@ group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idM
 create view DashRobertoModelosMenor as
 WITH ranked_especificacoes AS (
   SELECT
+	idUsuario,
     componente,
     especificacao,
     COUNT(idCapturaAlerta) AS qtd_alertas,
@@ -214,10 +215,14 @@ WITH ranked_especificacoes AS (
   FROM componente
   JOIN metrica ON fkComponente = idComponente
   LEFT JOIN captura_alerta ON fkMetrica = idMetrica
+  JOIN maquina on fkMaquina = idMaquina
+  JOIN filial on maquina.fkFilial = idFilial
+  JOIN usuarioFilial on usuarioFilial.fkFilial = idFilial
+  JOIN usuario on fkUsuario = idUsuario
   WHERE componente IN ('Processador', 'RAM', 'Rede', 'Armazenamento')
-  GROUP BY componente, especificacao
+  GROUP BY componente, especificacao, idUsuario
 )
-SELECT componente, especificacao, qtd_alertas
+SELECT idUsuario, componente, especificacao, qtd_alertas
 FROM ranked_especificacoes
 WHERE posicao = 1;
 
