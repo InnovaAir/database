@@ -487,6 +487,7 @@ FROM captura_alerta
 GROUP BY gravidade;
 
 -- Select alertas por niveis por componente
+CREATE OR REPLACE VIEW view_gravidade AS
 SELECT 
   c.componente AS componente, 
   ca.gravidade, 
@@ -503,6 +504,32 @@ GROUP BY
   c.componente, ca.gravidade
 ORDER BY 
   c.componente, ca.gravidade;
+  
+-- VIEW Endereço
+CREATE OR REPLACE VIEW view_endereco AS
+SELECT 
+  u.nome AS usuario,
+  e.aeroporto,
+  e.logradouro,
+  e.numero,
+  e.bairro,
+  e.cidade,
+  e.estado,
+  e.regiao
+FROM 
+  usuario u
+JOIN 
+  usuarioFilial uf ON u.idUsuario = uf.fkUsuario
+JOIN 
+  filial f ON uf.fkFilial = f.idFilial
+JOIN 
+  endereco e ON f.fkEndereco = e.idEndereco
+WHERE 
+  u.nome = 'Estela';
+
+SELECT usuario, aeroporto FROM view_endereco;
+  
+  
 /* VIEWS DO FEITOSA */
 CREATE VIEW identificar_enderecos AS
 SELECT e.idEndereco, e.aeroporto as complemento, e.estado, u.idUsuario
