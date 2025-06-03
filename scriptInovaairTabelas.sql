@@ -201,6 +201,26 @@ CREATE VIEW dashRobertoModelos as
 select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 28 DAY)
 group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina;
 
+create view DashRobertoModelosMenor as
+WITH ranked_especificacoes AS (
+  SELECT
+    componente,
+    especificacao,
+    COUNT(idCapturaAlerta) AS qtd_alertas,
+    ROW_NUMBER() OVER (
+      PARTITION BY componente
+      ORDER BY COUNT(idCapturaAlerta)
+    ) AS posicao
+  FROM componente
+  JOIN metrica ON fkComponente = idComponente
+  LEFT JOIN captura_alerta ON fkMetrica = idMetrica
+  WHERE componente IN ('Processador', 'RAM', 'Rede', 'Armazenamento')
+  GROUP BY componente, especificacao
+)
+SELECT componente, especificacao, qtd_alertas
+FROM ranked_especificacoes
+WHERE posicao = 1;
+
 -- VIEW GUILHERME
 CREATE VIEW dashRobertoDesempenho as
 SELECT
