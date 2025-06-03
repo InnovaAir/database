@@ -248,7 +248,7 @@ SELECT
 -- DADOS SIMULADOS:
 SELECT * from metrica;
 -- RAM
-INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
+/* INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
 (71.0, '2025-03-01 08:00:00', 'baixa', 1),
 (70.5, '2025-03-02 09:00:00', 'baixa', 1),
 (70.2, '2025-03-03 10:00:00', 'baixa', 1),
@@ -405,7 +405,7 @@ INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUE
 (95.7, '2025-05-17 15:00:00', 'critico', 11),
 (97.2, '2025-05-18 16:00:00', 'critico', 11),
 (99.0, '2025-05-19 17:00:00', 'critico', 11);
-
+ */
 
 -- DROP TABLE captura_alerta;
 
@@ -645,7 +645,7 @@ select * from captura_alerta;
 -- DADOS SIMULADOS EXTRAS (bastante coisa)
 
 
--- DADOS SIMULADOS:
+/* -- DADOS SIMULADOS:
 SELECT * from metrica;
 -- RAM
 INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
@@ -2130,4 +2130,4 @@ INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUE
 (94.4, '2025-04-16 14:00:00', 'critico', 25),
 (95.7, '2025-05-17 15:00:00', 'critico', 25),
 (97.2, '2025-05-18 16:00:00', 'critico', 25),
-(99.0, '2025-05-19 17:00:00', 'critico', 25);
+(99.0, '2025-05-19 17:00:00', 'critico', 25); */
