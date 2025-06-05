@@ -409,6 +409,30 @@ INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUE
 
 -- DROP TABLE captura_alerta;
 
+CREATE OR REPLACE VIEW detalhes_Modelo AS
+SELECT 
+    maquina.idMaquina,
+    maquina.numeroSerial,
+    maquina.enderecoMac,
+    maquina.nomeModelo,
+    maquina.hostname,
+    maquina.fkFilial,
+    componente.componente,
+    componente.especificacao,
+    metrica.metrica,
+    metrica.limiteMinimo,
+    metrica.limiteMaximo,
+    metrica.fkComponente,
+    metrica.idMetrica,
+    captura_alerta.valorCapturado,
+    captura_alerta.momento,
+    captura_alerta.gravidade
+FROM maquina
+LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
+LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
+LEFT JOIN captura_alerta ON captura_alerta.fkMetrica = metrica.idMetrica;
+SELECT * from detalhesmodelo where fkFilial = 2;
+
 SELECT * FROM captura_alerta;
 
 -- Total de alertas dos ultimos 3 meses
@@ -498,7 +522,7 @@ SELECT
   ca.gravidade, 
   COUNT(*) AS quantidade_alertas
 FROM 
-  captura_alerta ca
+  captura_alerta ca 
 JOIN 
   metrica m ON ca.fkMetrica = m.idMetrica
 JOIN 
@@ -588,52 +612,7 @@ SELECT e.idEndereco,
     JOIN endereco as e
     ON f.fkEndereco = e.idEndereco;
 
-  -- select com informações do modelo + alertas dos modelos
-SELECT 
-    maquina.idMaquina,
-    maquina.numeroSerial,
-    maquina.enderecoMac,
-    maquina.nomeModelo,
-    maquina.hostname,
-    maquina.fkFilial,
-    componente.componente,
-    componente.especificacao,
-    metrica.metrica,
-    metrica.limiteMinimo,
-    metrica.limiteMaximo,
-    metrica.fkComponente,
-    metrica.idMetrica,
-    captura_alerta.valorCapturado,
-    captura_alerta.momento,
-    captura_alerta.gravidade
-FROM maquina
-LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
-LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
-LEFT JOIN captura_alerta ON captura_alerta.fkMetrica = metrica.idMetrica;
-
-SELECT 
-    m.idMaquina,
-    m.numeroSerial,
-    m.enderecoMac,
-    m.nomeModelo,
-    m.hostname,
-    m.fkFilial,
-    c.componente,
-    c.especificacao,
-    c.fkMaquina,
-    mt.metrica,
-    mt.limiteMinimo,
-    mt.limiteMaximo,
-    mt.fkComponente,
-    mt.idMetrica,
-    ca.valorCapturado,
-    ca.momento,
-    ca.fkMetrica,
-    ca.gravidade
-    FROM maquina m
-    join componente c on c.fkMaquina = m.idMaquina
-    join metrica as mt on mt.fkComponente = c.idComponente
-    join captura_alerta as ca on ca.fkMetrica = mt.idMetrica;
+  
 
 select * from maquina;
 select * from componente;
