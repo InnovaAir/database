@@ -198,8 +198,8 @@ INSERT INTO metrica (metrica, limiteMinimo, limiteMaximo, fkComponente) VALUES
 
 -- VIEW LUCAS
 CREATE VIEW dashRobertoModelos as
-select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 28 DAY)
-group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina;
+select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina, nomeModelo from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 28 DAY)
+group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina, nomeModelo;
 
 create view DashRobertoModelosMenor as
 WITH ranked_especificacoes AS (
