@@ -1,27 +1,4 @@
-create database innovaair;
-
-create user 'innova_admin'@'%' identified by 'InnovaairAdmin@123';
-
-grant all on innovaair.* to 'innova_admin'@'%';
-
-create user 'innova_client'@'%' identified by 'Innovaair@123';
-
-grant select, insert on innovaair.maquina to 'innova_client'@'%';
-grant select, insert on innovaair.componente to 'innova_client'@'%';
-grant select, insert on innovaair.metrica to 'innova_client'@'%';
-grant select, insert on innovaair.captura_alerta to 'innova_client'@'%';
-grant insert on innovaair.dados_previsao to 'innova_client'@'%';
-grant select on innovaair.filial to 'innova_client'@'%';
-
-create user 'innova_s3'@'%' identified by 'Innovaair@123';
-
-grant select on innovaair.cliente to 'innova_s3'@'%';
-grant select on innovaair.filial to 'innova_s3'@'%';
-grant select on innovaair.maquina to 'innova_s3'@'%';
-grant select on innovaair.componente to 'innova_s3'@'%';
-grant select on innovaair.metrica to 'innova_s3'@'%';
-
-flush privileges;
+DROP DATABASE IF EXISTS innovaair;
 
 CREATE DATABASE IF NOT EXISTS innovaair;
 USE innovaair;
@@ -57,7 +34,7 @@ CREATE TABLE IF NOT EXISTS endereco (
   cep CHAR(9) NOT NULL,
   logradouro VARCHAR(100) NOT NULL,
   numero VARCHAR(45) NOT NULL,
-  complemento VARCHAR(45),
+  aeroporto VARCHAR(45),
   bairro VARCHAR(45) NOT NULL,
   cidade VARCHAR(45) NOT NULL,
   estado VARCHAR(45) NOT NULL,
@@ -85,6 +62,7 @@ CREATE TABLE IF NOT EXISTS maquina (
   fkFilial INT NOT NULL, #Fk Não-Relacional // Por ser outro database
   numeroSerial VARCHAR(45) NOT NULL,
   enderecoMac VARCHAR(45) NOT NULL,
+  nomeModelo VARCHAR(45) NOT NULL,
   hostname VARCHAR(45) NOT NULL,
   CONSTRAINT filialMaquina FOREIGN KEY (fkFilial) REFERENCES filial(idFilial)
 );
@@ -105,7 +83,7 @@ CREATE TABLE IF NOT EXISTS metrica (
   fkComponente INT NOT NULL,
   CONSTRAINT fk_metrica_componente FOREIGN KEY (fkComponente) REFERENCES componente (idComponente)
 );
-
+select * from metrica;
 CREATE TABLE IF NOT EXISTS captura_alerta (
   idCapturaAlerta INT PRIMARY KEY AUTO_INCREMENT,
   valorCapturado FLOAT NOT NULL,
@@ -131,47 +109,52 @@ INSERT INTO usuario VALUES
 (default, 'Estela', 'estela@latam.com', 'Senha123@', 2, 3),
 (default, 'Kátia', 'katia@latam.com', 'Senha123@', 2, 4);
 
-INSERT INTO endereco (cep, logradouro, numero, complemento, bairro, cidade, estado, regiao) VALUES
-('09560-850', 'Rod. Hélio Smidt', '1', 'Terminal 1', 'Cumbica', 'Guarulhos', 'SP', 'Sudeste'),  -- Aeroporto de GRU
-('21041-253', 'Av. Vinte de Janeiro', 's/n', 'Terminal Principal', 'Galeão', 'Rio de Janeiro', 'RJ', 'Sudeste'),  -- Galeão
-('31742-010', 'Av. Carlos Drummond', '5.600', 'Terminal 2', 'Confins', 'Belo Horizonte', 'MG', 'Sudeste'),  -- Confins
-('81530-900', 'Av. Rocha Pombo', 's/n', 'Terminal de Passageiros', 'Água Verde', 'Curitiba', 'PR', 'Sul'),  -- Afonso Pena
-('91010-971', 'Av. Severo Dulius', '9000', 'Terminal 1', 'São João', 'Porto Alegre', 'RS', 'Sul'); -- Salgado Filho
+INSERT INTO endereco (cep, logradouro, numero, aeroporto, bairro, cidade, estado, regiao) VALUES
+('09560-850', 'Rod. Hélio Smidt', '1', 'Internacional de Guarulhos (GRU)', 'Cumbica', 'Guarulhos', 'SP', 'Sudeste'),  -- Aeroporto de GRU
+('21041-253', 'Av. Vinte de Janeiro', 's/n', 'Internacional de Guarulhos (GRU)', 'Galeão', 'Rio de Janeiro', 'RJ', 'Sudeste'),  -- Galeão
+('31742-010', 'Av. Carlos Drummond', '5.600', 'GALEÃO', 'de Confins', 'Belo Horizonte', 'MG', 'Sudeste'),  -- Confins
+('81530-900', 'Av. Rocha Pombo', 's/n', 'Afonso Pena', 'Água Verde', 'Curitiba', 'PR', 'Sul'),  -- Afonso Pena
+('91010-971', 'Av. Severo Dulius', '9000', 'Salgado Filho', 'São João', 'Porto Alegre', 'RS', 'Sul'); -- Salgado Filho
 
 INSERT INTO filial (terminal, setor, fkCliente, fkEndereco) VALUES
-('GRU', 'Embarque Internacional', 1, 1),  -- GRU
-('Galeão', 'Carga Aérea', 2, 2),  -- Galeão
-('de Confins', 'Administrativo', 2, 3),  -- Confins
-('Principal - Afonso Pena', 'Segurança', 2, 4),  -- Curitiba
-('Salgado Filho', 'Operações', 2, 5);  -- Porto Alegre
+('1', 'Embarque Internacional', 2, 1),  -- GRU
+('2', 'Carga Aérea', 2, 2),  -- Galeão
+('3', 'Administrativo', 2, 3),  -- Confins
+('4', 'Segurança', 2, 4),  -- Curitiba
+('5', 'Operações', 2, 5);  -- Porto Alegre
 
 INSERT INTO usuarioFilial VALUES
 (2,1),
-(2,2);
+(2,2),
+(3,1),
+(3,3),
+(4,4),
+(4,5);
 
-INSERT INTO maquina (fkFilial, numeroSerial, enderecoMac, hostname) VALUES
-(1, 'SN1001', '00:1A:2B:3C:4D:5E', 'maquina-1'),
-(2, 'SN1002', '00:1A:2B:3C:4D:5F', 'maquina-2'),
-(1, 'SN1003', '00:1A:2B:3C:4D:60', 'maquina-3'),
-(2, 'SN1004', '00:1A:2B:3C:4D:61', 'maquina-4'),
-(1, 'SN1005', '00:1A:2B:3C:4D:62', 'maquina-5'),
-(2, 'SN1006', '00:1A:2B:3C:4D:63', 'maquina-6'),
-(1, 'SN1007', '00:1A:2B:3C:4D:64', 'maquina-7'),
-(2, 'SN1008', '00:1A:2B:3C:4D:65', 'maquina-8'),
-(1, 'SN1009', '00:1A:2B:3C:4D:66', 'maquina-9'),
-(2, 'SN1010', '00:1A:2B:3C:4D:67', 'maquina-10');
+
+INSERT INTO maquina (fkFilial, numeroSerial, enderecoMac, hostname, nomeModelo) VALUES
+(1, 'SN1001', '00:1A:2B:3C:4D:5E', 'maquina-1', 'Asus ExpertCenter'),
+(2, 'SN1002', '00:1A:2B:3C:4D:5F', 'maquina-2', 'Asus ExpertCenter'),
+(1, 'SN1003', '00:1A:2B:3C:4D:60', 'maquina-3', 'Asus ExpertCenter'),
+(2, 'SN1004', '00:1A:2B:3C:4D:61', 'maquina-4', 'Asus ExpertCenter'),
+(1, 'SN1005', '00:1A:2B:3C:4D:62', 'maquina-5', 'Lenovo ThinkCentre'),
+(2, 'SN1006', '00:1A:2B:3C:4D:63', 'maquina-6', 'Lenovo ThinkCentre'),
+(1, 'SN1007', '00:1A:2B:3C:4D:64', 'maquina-7', 'HP EliteDesk'),
+(2, 'SN1008', '00:1A:2B:3C:4D:65', 'maquina-8', 'HP EliteDesk'),
+(1, 'SN1009', '00:1A:2B:3C:4D:66', 'maquina-9', 'HP EliteDesk'),
+(2, 'SN1010', '00:1A:2B:3C:4D:67', 'maquina-10', 'Acer Veriton');
 
 -- Inserir componentes (4 por máquina)
 INSERT INTO componente (fkMaquina, componente, especificacao) VALUES
 (1, 'Processador', 'Ryzen 3'), (1, 'RAM', 'Kingston 16GB'), (1, 'Armazenamento', 'Samsung SSD 1TB'), (1, 'Rede', 'Intel Gigabit'),
-(2, 'Processador', 'Intel i5'), (2, 'RAM', 'Corsair 32GB'), (2, 'Armazenamento', 'WD Blue 2TB'), (2, 'Rede', 'Realtek 1G'),
-(3, 'Processador', 'Intel i7'), (3, 'RAM', 'HyperX 8GB'), (3, 'Armazenamento', 'Crucial 1TB'), (3, 'Rede', 'TP-Link 1G'),
-(4, 'Processador', 'Ryzen 5'), (4, 'RAM', 'G.Skill 16GB'), (4, 'Armazenamento', 'Seagate 2TB'), (4, 'Rede', 'D-Link 1G'),
+(2, 'Processador', 'Ryzen 3'), (2, 'RAM', 'Kingston 16GB'), (2, 'Armazenamento', 'Samsung SSD 1TB'), (2, 'Rede', 'Intel Gigabit'),
+(3, 'Processador', 'Ryzen 3'), (3, 'RAM', 'Kingston 16GB'), (3, 'Armazenamento', 'Samsung SSD 1TB'), (3, 'Rede', 'Intel Gigabit'),
+(4, 'Processador', 'Ryzen 3'), (4, 'RAM', 'Kingston 16GB'), (4, 'Armazenamento', 'Samsung SSD 1TB'), (4, 'Rede', 'Intel Gigabit'),
 (5, 'Processador', 'Intel Xeon'), (5, 'RAM', 'Patriot 8GB'), (5, 'Armazenamento', 'Kingston SSD 500GB'), (5, 'Rede', 'Intel Ethernet'),
-(6, 'Processador', 'Ryzen 7'), (6, 'RAM', 'Corsair 16GB'), (6, 'Armazenamento', 'Samsung SSD 2TB'), (6, 'Rede', 'Realtek 2.5G'),
+(6, 'Processador', 'Intel Xeon'), (6, 'RAM', 'Patriot 8GB'), (6, 'Armazenamento', 'Kingston SSD 500GB'), (6, 'Rede', 'Intel Ethernet'),
 (7, 'Processador', 'Intel i9'), (7, 'RAM', 'Kingston 32GB'), (7, 'Armazenamento', 'WD Black 1TB'), (7, 'Rede', 'TP-Link 1G'),
-(8, 'Processador', 'Ryzen 9'), (8, 'RAM', 'G.Skill 8GB'), (8, 'Armazenamento', 'Crucial SSD 2TB'), (8, 'Rede', 'D-Link 2.5G'),
-(9, 'Processador', 'Intel Xeon'), (9, 'RAM', 'HyperX 16GB'), (9, 'Armazenamento', 'Seagate 1TB'), (9, 'Rede', 'Intel Gigabit'),
+(8, 'Processador', 'Intel i9'), (8, 'RAM', 'Kingston 32GB'), (8, 'Armazenamento', 'WD Black 1TB'), (8, 'Rede', 'TP-Link 1G'),
+(9, 'Processador', 'Intel i9'), (9, 'RAM', 'Kingston 32GB'), (9, 'Armazenamento', 'WD Black 1TB'), (9, 'Rede', 'TP-Link 1G'),
 (10, 'Processador', 'Ryzen 5'), (10, 'RAM', 'Corsair 16GB'), (10, 'Armazenamento', 'Kingston 512GB'), (10, 'Rede', 'Intel Ethernet');
 
 -- Inserir métricas para cada componente (supondo ids de componente consecutivos)
@@ -215,8 +198,33 @@ INSERT INTO metrica (metrica, limiteMinimo, limiteMaximo, fkComponente) VALUES
 
 -- VIEW LUCAS
 CREATE VIEW dashRobertoModelos as
-select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 30 DAY)
-group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina;
+select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina, nomeModelo from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 28 DAY)
+group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina, nomeModelo;
+select * from componente;
+create view DashRobertoModelosMenor as
+WITH ranked_especificacoes AS (
+  SELECT
+	idUsuario,
+    componente,
+    especificacao,
+    COUNT(idCapturaAlerta) AS qtd_alertas,
+    ROW_NUMBER() OVER (
+      PARTITION BY componente
+      ORDER BY COUNT(idCapturaAlerta)
+    ) AS posicao
+  FROM componente
+  LEFT JOIN metrica ON fkComponente = idComponente
+  LEFT JOIN captura_alerta ON fkMetrica = idMetrica
+  JOIN maquina on fkMaquina = idMaquina
+  JOIN filial on maquina.fkFilial = idFilial
+  JOIN usuarioFilial on usuarioFilial.fkFilial = idFilial
+  JOIN usuario on fkUsuario = idUsuario
+  WHERE componente IN ('Processador', 'RAM', 'Rede', 'Armazenamento')
+  GROUP BY componente, especificacao, idUsuario
+)
+SELECT idUsuario, componente, especificacao, qtd_alertas
+FROM ranked_especificacoes
+WHERE posicao = 1;
 
 -- VIEW GUILHERME
 CREATE VIEW dashRobertoDesempenho as
@@ -237,14 +245,159 @@ SELECT
     LEFT JOIN captura_alerta ca ON ca.fkMetrica = me.idMetrica AND ca.momento >= NOW() - INTERVAL 1 DAY
     GROUP BY totem, terminal, usuario;
 
-select * from dashRobertoDesempenho;
-
--- DROP TABLE captura_alerta;
+CREATE OR REPLACE VIEW detalhes_Modelo AS
+SELECT 
+    maquina.idMaquina,
+    maquina.numeroSerial,
+    maquina.enderecoMac,
+    maquina.nomeModelo,
+    maquina.hostname,
+    maquina.fkFilial,
+    componente.componente,
+    componente.especificacao,
+    metrica.metrica,
+    metrica.limiteMinimo,
+    metrica.limiteMaximo,
+    metrica.fkComponente,
+    metrica.idMetrica,
+    captura_alerta.valorCapturado,
+    captura_alerta.momento,
+    captura_alerta.gravidade
+FROM maquina
+LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
+LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
+LEFT JOIN captura_alerta ON captura_alerta.fkMetrica = metrica.idMetrica;
+SELECT * from detalhes_Modelo;
 
 SELECT * FROM captura_alerta;
 
+-- Total de alertas dos ultimos 3 meses
+SELECT COUNT(*) AS total_alertas_cpu_ultimo_mes
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND c.componente = 'RAM'
+  AND ca.momento >= DATE_SUB(CURDATE(), INTERVAL 3 MONTH);
+
+SELECT 
+  MONTH(ca.momento) AS mes,
+  YEAR(ca.momento) AS ano,
+  COUNT(*) AS total_alertas
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND c.componente = 'RAM'
+  AND ca.momento BETWEEN '2025-03-01' AND '2025-05-31'
+GROUP BY YEAR(ca.momento), MONTH(ca.momento)
+ORDER BY ano, mes;
+
+-- Ultimos 3 mêses
+-- RAM
+CREATE OR REPLACE VIEW view_alertas_ultimos_3_meses_ram AS
+SELECT 
+  DATE_FORMAT(ca.momento, '%M') AS mes,
+  COUNT(*) AS total_alertas
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND c.componente = 'RAM'
+  AND ca.momento >= DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH), '%Y-%m-01')
+  AND ca.momento <  DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')
+GROUP BY mes;
+
+-- CPU
+CREATE OR REPLACE VIEW view_alertas_ultimos_3_meses_cpu AS
+SELECT 
+  DATE_FORMAT(ca.momento, '%M') AS mes,
+  COUNT(*) AS total_alertas
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND c.componente = 'Processador'
+  AND ca.momento >= DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH), '%Y-%m-01')
+  AND ca.momento <  DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')
+GROUP BY mes;
+
+CREATE OR REPLACE VIEW view_alertas_ultimos_3_meses_ram_cpu AS
+SELECT 
+  DATE_FORMAT(ca.momento, '%M') AS mes,
+  SUM(CASE WHEN c.componente = 'RAM' THEN 1 ELSE 0 END) AS total_alertas_ram,
+  SUM(CASE WHEN c.componente = 'Processador' THEN 1 ELSE 0 END) AS total_alertas_cpu
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE m.metrica = 'porcentagemUso'
+  AND ca.momento >= DATE_FORMAT(DATE_SUB(CURRENT_DATE(), INTERVAL 3 MONTH), '%Y-%m-01')
+  AND ca.momento <  DATE_FORMAT(CURRENT_DATE(), '%Y-%m-01')
+GROUP BY mes
+ORDER BY 
+  STR_TO_DATE(mes, '%M');
+
+-- Select TODOS 
+SELECT * FROM view_alertas_ultimos_3_meses_ram_cpu;
+
+-- Select Ram
+SELECT * FROM view_alertas_ultimos_3_meses_ram;
+
+-- Select Cpu
+SELECT * FROM view_alertas_ultimos_3_meses_cpu;
+
+-- Select alertas por nivel geral (não utilizado) 
+SELECT gravidade, COUNT(*) AS quantidade_alertas
+FROM captura_alerta
+GROUP BY gravidade;
+
+-- Select alertas por niveis por componente
+CREATE OR REPLACE VIEW view_gravidade AS
+SELECT 
+  c.componente AS componente, 
+  ca.gravidade, 
+  COUNT(*) AS quantidade_alertas
+FROM 
+  captura_alerta ca 
+JOIN 
+  metrica m ON ca.fkMetrica = m.idMetrica
+JOIN 
+  componente c ON m.fkComponente = c.idComponente
+WHERE 
+  c.componente IN ('Processador', 'RAM')
+GROUP BY 
+  c.componente, ca.gravidade
+ORDER BY 
+  c.componente, ca.gravidade;
+  
+-- VIEW Endereço
+CREATE OR REPLACE VIEW view_endereco AS
+SELECT 
+  u.nome AS usuario,
+  e.aeroporto,
+  e.logradouro,
+  e.numero,
+  e.bairro,
+  e.cidade,
+  e.estado,
+  e.regiao
+FROM 
+  usuario u
+JOIN 
+  usuarioFilial uf ON u.idUsuario = uf.fkUsuario
+JOIN 
+  filial f ON uf.fkFilial = f.idFilial
+JOIN 
+  endereco e ON f.fkEndereco = e.idEndereco
+WHERE 
+  u.nome = 'Estela';
+
+SELECT usuario, aeroporto FROM view_endereco;
+  
+  
+/* VIEWS DO FEITOSA */
 CREATE VIEW identificar_enderecos AS
-SELECT e.idEndereco, e.complemento, e.estado, u.idUsuario
+SELECT e.idEndereco, e.aeroporto as complemento, e.estado, u.idUsuario
 	FROM usuario AS u
     JOIN usuarioFilial as uf
     ON uf.fkUsuario = u.idUsuario
@@ -294,3 +447,26 @@ SELECT e.idEndereco,
     ON m.fkFilial = f.idFilial
     JOIN endereco as e
     ON f.fkEndereco = e.idEndereco;
+    
+    create user 'innova_admin'@'%' identified by 'InnovaairAdmin@123';
+
+grant all on innovaair.* to 'innova_admin'@'%';
+
+create user 'innova_client'@'%' identified by 'Innovaair@123';
+
+grant select, insert on innovaair.maquina to 'innova_client'@'%';
+grant select, insert on innovaair.componente to 'innova_client'@'%';
+grant select, insert on innovaair.metrica to 'innova_client'@'%';
+grant select, insert on innovaair.captura_alerta to 'innova_client'@'%';
+grant insert on innovaair.dados_previsao to 'innova_client'@'%';
+grant select on innovaair.filial to 'innova_client'@'%';
+
+create user 'innova_s3'@'%' identified by 'Innovaair@123';
+
+grant select on innovaair.cliente to 'innova_s3'@'%';
+grant select on innovaair.filial to 'innova_s3'@'%';
+grant select on innovaair.maquina to 'innova_s3'@'%';
+grant select on innovaair.componente to 'innova_s3'@'%';
+grant select on innovaair.metrica to 'innova_s3'@'%';
+
+flush privileges;

@@ -8,7 +8,6 @@ grant select, insert on innovaair.maquina to 'innova_client'@'%';
 grant select, insert on innovaair.componente to 'innova_client'@'%';
 grant select, insert on innovaair.metrica to 'innova_client'@'%';
 grant select, insert on innovaair.captura_alerta to 'innova_client'@'%';
-grant insert on innovaair.dados_previsao to 'innova_client'@'%';
 grant select on innovaair.filial to 'innova_client'@'%';
 
 create user 'innova_s3'@'%' identified by 'Innovaair@123';
@@ -19,4 +18,4 @@ grant select on innovaair.maquina to 'innova_s3'@'%';
 grant select on innovaair.componente to 'innova_s3'@'%';
 grant select on innovaair.metrica to 'innova_s3'@'%';
 
-flush privileges
+flush privileges;
