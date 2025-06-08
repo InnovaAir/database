@@ -266,7 +266,8 @@ SELECT
 FROM maquina
 LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
 LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
-LEFT JOIN captura_alerta ON captura_alerta.fkMetrica = metrica.idMetrica;
+LEFT JOIN captura_alerta ON captura_alerta.fkMetrica = metrica.idMetrica
+ WHERE captura_alerta.momento >= NOW() - INTERVAL 30 DAY;;
 SELECT * from detalhes_Modelo;
 
 SELECT * FROM captura_alerta;
