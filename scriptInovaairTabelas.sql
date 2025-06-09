@@ -265,9 +265,9 @@ SELECT
     captura_alerta.gravidade
 FROM
     maquina
-    LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
+    JOIN componente ON componente.fkMaquina = maquina.idMaquina
     LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
-    LEFT JOIN captura_alerta 
+     JOIN captura_alerta 
         ON captura_alerta.fkMetrica = metrica.idMetrica
         AND captura_alerta.momento >= NOW() - INTERVAL 30 DAY;;
 SELECT * from detalhes_Modelo;
