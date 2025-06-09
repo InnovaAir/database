@@ -111,25 +111,18 @@ INSERT INTO usuario VALUES
 
 INSERT INTO endereco (cep, logradouro, numero, aeroporto, bairro, cidade, estado, regiao) VALUES
 ('09560-850', 'Rod. Hélio Smidt', '1', 'Internacional de Guarulhos (GRU)', 'Cumbica', 'Guarulhos', 'SP', 'Sudeste'),  -- Aeroporto de GRU
-('21041-253', 'Av. Vinte de Janeiro', 's/n', 'Internacional de Guarulhos (GRU)', 'Galeão', 'Rio de Janeiro', 'RJ', 'Sudeste'),  -- Galeão
-('31742-010', 'Av. Carlos Drummond', '5.600', 'GALEÃO', 'de Confins', 'Belo Horizonte', 'MG', 'Sudeste'),  -- Confins
-('81530-900', 'Av. Rocha Pombo', 's/n', 'Afonso Pena', 'Água Verde', 'Curitiba', 'PR', 'Sul'),  -- Afonso Pena
-('91010-971', 'Av. Severo Dulius', '9000', 'Salgado Filho', 'São João', 'Porto Alegre', 'RS', 'Sul'); -- Salgado Filho
+('20021-340', 'Praça Senador Salgado Filho', 's/n', 'Aeroporto Santos Dumont', 'Centro', 'Rio de Janeiro', 'RJ', 'Sudeste'); -- Aeroporto Santos Dummont
 
 INSERT INTO filial (terminal, setor, fkCliente, fkEndereco) VALUES
-('1', 'Embarque Internacional', 2, 1),  -- GRU
-('2', 'Carga Aérea', 2, 2),  -- Galeão
-('3', 'Administrativo', 2, 3),  -- Confins
-('4', 'Segurança', 2, 4),  -- Curitiba
-('5', 'Operações', 2, 5);  -- Porto Alegre
+('1', 'Embarque Internacional', 2, 1),  -- GRU - SP
+('2', 'Carga Aérea', 2, 2);  -- SANTOS DUMONT - RJ
 
-INSERT INTO usuarioFilial VALUES
-(2,1),
-(2,2),
-(3,1),
-(3,3),
-(4,4),
-(4,5);
+INSERT INTO usuarioFilial VALUES 
+(2,1), 
+(2,2), 
+(3,1), 
+(4,1), 
+(4,2);
 
 
 INSERT INTO maquina (fkFilial, numeroSerial, enderecoMac, hostname, nomeModelo) VALUES
@@ -389,7 +382,6 @@ grant select, insert on innovaair.maquina to 'innova_client'@'%';
 grant select, insert on innovaair.componente to 'innova_client'@'%';
 grant select, insert on innovaair.metrica to 'innova_client'@'%';
 grant select, insert on innovaair.captura_alerta to 'innova_client'@'%';
-grant insert on innovaair.dados_previsao to 'innova_client'@'%';
 grant select on innovaair.filial to 'innova_client'@'%';
 
 create user 'innova_s3'@'%' identified by 'Innovaair@123';
