@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS innovaair;
+# DROP DATABASE IF EXISTS innovaair;
 
 CREATE DATABASE IF NOT EXISTS innovaair;
 USE innovaair;
@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS metrica (
   fkComponente INT NOT NULL,
   CONSTRAINT fk_metrica_componente FOREIGN KEY (fkComponente) REFERENCES componente (idComponente)
 );
-
+select * from metrica;
 CREATE TABLE IF NOT EXISTS captura_alerta (
   idCapturaAlerta INT PRIMARY KEY AUTO_INCREMENT,
   valorCapturado FLOAT NOT NULL,
@@ -198,71 +198,8 @@ INSERT INTO metrica (metrica, limiteMinimo, limiteMaximo, fkComponente) VALUES
 
 -- VIEW LUCAS
 CREATE VIEW dashRobertoModelos as
-select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 28 DAY)
-group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina;
-
-SELECT * FROM dashRobertoModelos;
-
--- VIEW LETÍCIA
-CREATE VIEW view_alerta_3_meses AS
-SELECT 
-    gravidade, 
-    COUNT(idCapturaAlerta) AS qtdAlertas, 
-    componente, 
-    terminal, 
-    idUsuario, 
-    idMaquina 
-FROM 
-    captura_alerta 
-    JOIN metrica ON fkMetrica = idMetrica 
-    JOIN componente ON fkComponente = idComponente 
-    JOIN maquina ON fkMaquina = idMaquina 
-    JOIN filial ON maquina.fkFilial = idFilial 
-    JOIN usuarioFilial ON usuarioFilial.fkFilial = idFilial 
-    JOIN usuario ON fkUsuario = idUsuario 
-WHERE 
-    momento >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
-GROUP BY 
-    gravidade, 
-    componente, 
-    terminal, 
-    idUsuario, 
-    idMaquina;
-
-SELECT * FROM view_alerta_3_meses;
-
--- TESTE
-CREATE OR REPLACE VIEW view_grafico_linha AS
-SELECT 
-    MONTHNAME(ca.momento) AS mes,
-    SUM(CASE WHEN c.componente = 'RAM' THEN 1 ELSE 0 END) AS total_alertas_ram,
-    SUM(CASE WHEN c.componente = 'Processador' THEN 1 ELSE 0 END) AS total_alertas_cpu
-FROM captura_alerta ca
-JOIN metrica m ON ca.fkMetrica = m.idMetrica
-JOIN componente c ON m.fkComponente = c.idComponente
-WHERE ca.momento >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
-GROUP BY mes
-ORDER BY FIELD(mes, 'January', 'February', 'March', 'April', 'May', 'June',
-                      'July', 'August', 'September', 'October', 'November', 'December');
-                      
-SELECT * FROM view_grafico_linha;
-
-CREATE VIEW view_kpi_alerta AS
-SELECT 
-    c.componente AS componente,
-    ca.gravidade,
-    COUNT(*) AS quantidade_alertas
-FROM captura_alerta ca
-JOIN metrica m ON ca.fkMetrica = m.idMetrica
-JOIN componente c ON m.fkComponente = c.idComponente
-JOIN maquina ma ON c.fkMaquina = ma.idMaquina
-JOIN filial f ON ma.fkFilial = f.idFilial
-JOIN usuarioFilial uf ON f.idFilial = uf.fkFilial
-JOIN usuario u ON uf.fkUsuario = u.idUsuario
-WHERE ca.momento >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
-GROUP BY c.componente, ca.gravidade;
-
-SELECT * FROM view_kpi_alerta;
+select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina, nomeModelo from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 28 DAY)
+group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina, nomeModelo;
 
 create view DashRobertoModelosMenor as
 WITH ranked_especificacoes AS (
@@ -303,15 +240,16 @@ SELECT
     JOIN filial f ON m.fkFilial = f.idFilial
     LEFT JOIN componente c ON c.fkMaquina = m.idMaquina
     LEFT JOIN metrica me ON me.fkComponente = c.idComponente
-    join usuarioFilial uf on uf.fkFilial = idfilial
-    join usuario u on uf.fkUsuario = u.idUsuario
-    LEFT JOIN captura_alerta ca ON ca.fkMetrica = me.idMetrica AND ca.momento >= NOW() - INTERVAL 1 DAY
+    JOIN usuarioFilial uf on uf.fkFilial = idfilial
+    JOIN usuario u on uf.fkUsuario = u.idUsuario
+    LEFT JOIN captura_alerta ca ON ca.fkMetrica = me.idMetrica AND ca.momento >= NOW() - INTERVAL 28 DAY
     GROUP BY totem, terminal, usuario;
 
+select * from dashRobertoDesempenho WHERE usuario = 2;
 -- DADOS SIMULADOS:
 SELECT * from metrica;
 -- RAM
-INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
+/* INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
 (71.0, '2025-03-01 08:00:00', 'baixa', 1),
 (70.5, '2025-03-02 09:00:00', 'baixa', 1),
 (70.2, '2025-03-03 10:00:00', 'baixa', 1),
@@ -468,7 +406,7 @@ INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUE
 (95.7, '2025-05-17 15:00:00', 'critico', 11),
 (97.2, '2025-05-18 16:00:00', 'critico', 11),
 (99.0, '2025-05-19 17:00:00', 'critico', 11);
-
+ */
 
 -- DROP TABLE captura_alerta;
 
@@ -490,20 +428,10 @@ SELECT
     captura_alerta.valorCapturado,
     captura_alerta.momento,
     captura_alerta.gravidade
-<<<<<<< Updated upstream
-FROM
-    maquina
-    JOIN componente ON componente.fkMaquina = maquina.idMaquina
-    LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
-     JOIN captura_alerta 
-        ON captura_alerta.fkMetrica = metrica.idMetrica
-        AND captura_alerta.momento >= NOW() - INTERVAL 30 DAY;;
-=======
 FROM maquina
 LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
 LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
 LEFT JOIN captura_alerta ON captura_alerta.fkMetrica = metrica.idMetrica;
->>>>>>> Stashed changes
 SELECT * from detalhes_Modelo;
 
 SELECT * FROM captura_alerta;
@@ -606,8 +534,6 @@ GROUP BY
   c.componente, ca.gravidade
 ORDER BY 
   c.componente, ca.gravidade;
-  
-SELECT * FROM view_gravidade;
   
 -- VIEW Endereço
 CREATE OR REPLACE VIEW view_endereco AS
