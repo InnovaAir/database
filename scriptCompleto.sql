@@ -405,6 +405,36 @@ SELECT e.idEndereco, e.aeroporto as complemento, e.estado, u.idUsuario
     ON uf.fkFilial = f.idFilial
     JOIN endereco as e
     ON f.fkEndereco = e.idEndereco;
+    
+/* VIEWS LETÍCIA */
+
+CREATE OR REPLACE VIEW view_grafico_linha AS
+SELECT 
+    MONTHNAME(ca.momento) AS mes,
+    SUM(CASE WHEN c.componente = 'RAM' THEN 1 ELSE 0 END) AS total_alertas_ram,
+    SUM(CASE WHEN c.componente = 'Processador' THEN 1 ELSE 0 END) AS total_alertas_cpu
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE ca.momento >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+GROUP BY mes
+ORDER BY FIELD(mes, 'January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December');
+                      
+CREATE VIEW view_kpi_alerta AS
+SELECT 
+    c.componente AS componente,
+    ca.gravidade,
+    COUNT(*) AS quantidade_alertas
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+JOIN maquina ma ON c.fkMaquina = ma.idMaquina
+JOIN filial f ON ma.fkFilial = f.idFilial
+JOIN usuarioFilial uf ON f.idFilial = uf.fkFilial
+JOIN usuario u ON uf.fkUsuario = u.idUsuario
+WHERE ca.momento >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+GROUP BY c.componente, ca.gravidade;
 
 # Obtem as metricas dos componentes de uma maquina
 CREATE VIEW obter_metrica_componente AS 

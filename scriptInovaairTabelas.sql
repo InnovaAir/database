@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS metrica (
   fkComponente INT NOT NULL,
   CONSTRAINT fk_metrica_componente FOREIGN KEY (fkComponente) REFERENCES componente (idComponente)
 );
-select * from metrica;
+
 CREATE TABLE IF NOT EXISTS captura_alerta (
   idCapturaAlerta INT PRIMARY KEY AUTO_INCREMENT,
   valorCapturado FLOAT NOT NULL,
@@ -198,10 +198,73 @@ INSERT INTO metrica (metrica, limiteMinimo, limiteMaximo, fkComponente) VALUES
 
 -- VIEW LUCAS
 CREATE VIEW dashRobertoModelos as
-select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina, nomeModelo from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 28 DAY)
-group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina, nomeModelo;
+select gravidade, count(idCapturaAlerta) as qtdAlertas, especificacao, componente, terminal, WEEK(momento) as semanas, idUsuario, idMaquina from captura_alerta join metrica on fkMetrica = idMetrica join componente on fkComponente = idComponente join maquina on fkMaquina = idMaquina join filial on maquina.fkFilial = idFilial join usuarioFilial on usuarioFilial.fkFilial = idFilial join usuario on fkUsuario = idUsuario where momento >= DATE_SUB(NOW(), INTERVAL 28 DAY)
+group by gravidade, especificacao, componente, terminal, semanas, idUsuario, idMaquina;
 
-create view dashRobertoModelosMenor as
+SELECT * FROM dashRobertoModelos;
+
+-- VIEW LETÍCIA
+CREATE VIEW view_alerta_3_meses AS
+SELECT 
+    gravidade, 
+    COUNT(idCapturaAlerta) AS qtdAlertas, 
+    componente, 
+    terminal, 
+    idUsuario, 
+    idMaquina 
+FROM 
+    captura_alerta 
+    JOIN metrica ON fkMetrica = idMetrica 
+    JOIN componente ON fkComponente = idComponente 
+    JOIN maquina ON fkMaquina = idMaquina 
+    JOIN filial ON maquina.fkFilial = idFilial 
+    JOIN usuarioFilial ON usuarioFilial.fkFilial = idFilial 
+    JOIN usuario ON fkUsuario = idUsuario 
+WHERE 
+    momento >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+GROUP BY 
+    gravidade, 
+    componente, 
+    terminal, 
+    idUsuario, 
+    idMaquina;
+
+SELECT * FROM view_alerta_3_meses;
+
+-- TESTE
+CREATE OR REPLACE VIEW view_grafico_linha AS
+SELECT 
+    MONTHNAME(ca.momento) AS mes,
+    SUM(CASE WHEN c.componente = 'RAM' THEN 1 ELSE 0 END) AS total_alertas_ram,
+    SUM(CASE WHEN c.componente = 'Processador' THEN 1 ELSE 0 END) AS total_alertas_cpu
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+WHERE ca.momento >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+GROUP BY mes
+ORDER BY FIELD(mes, 'January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December');
+                      
+SELECT * FROM view_grafico_linha;
+
+CREATE VIEW view_kpi_alerta AS
+SELECT 
+    c.componente AS componente,
+    ca.gravidade,
+    COUNT(*) AS quantidade_alertas
+FROM captura_alerta ca
+JOIN metrica m ON ca.fkMetrica = m.idMetrica
+JOIN componente c ON m.fkComponente = c.idComponente
+JOIN maquina ma ON c.fkMaquina = ma.idMaquina
+JOIN filial f ON ma.fkFilial = f.idFilial
+JOIN usuarioFilial uf ON f.idFilial = uf.fkFilial
+JOIN usuario u ON uf.fkUsuario = u.idUsuario
+WHERE ca.momento >= DATE_SUB(NOW(), INTERVAL 3 MONTH)
+GROUP BY c.componente, ca.gravidade;
+
+SELECT * FROM view_kpi_alerta;
+
+create view DashRobertoModelosMenor as
 WITH ranked_especificacoes AS (
   SELECT
 	idUsuario,
@@ -213,7 +276,7 @@ WITH ranked_especificacoes AS (
       ORDER BY COUNT(idCapturaAlerta)
     ) AS posicao
   FROM componente
-  LEFT JOIN metrica ON fkComponente = idComponente
+  JOIN metrica ON fkComponente = idComponente
   LEFT JOIN captura_alerta ON fkMetrica = idMetrica
   JOIN maquina on fkMaquina = idMaquina
   JOIN filial on maquina.fkFilial = idFilial
@@ -245,8 +308,172 @@ SELECT
     LEFT JOIN captura_alerta ca ON ca.fkMetrica = me.idMetrica AND ca.momento >= NOW() - INTERVAL 1 DAY
     GROUP BY totem, terminal, usuario;
 
+-- DADOS SIMULADOS:
+SELECT * from metrica;
+-- RAM
+INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
+(71.0, '2025-03-01 08:00:00', 'baixa', 1),
+(70.5, '2025-03-02 09:00:00', 'baixa', 1),
+(70.2, '2025-03-03 10:00:00', 'baixa', 1),
+(71.3, '2025-03-04 11:00:00', 'baixa', 1),
+(72.0, '2025-03-05 12:00:00', 'baixa', 1),
+(70.9, '2025-03-06 13:00:00', 'baixa', 1),
+(71.7, '2025-03-07 14:00:00', 'baixa', 1),
+(72.5, '2025-03-08 15:00:00', 'baixa', 1),
+(70.3, '2025-03-09 16:00:00', 'baixa', 1),
+(73.0, '2025-03-10 17:00:00', 'baixa', 1),
+(71.1, '2025-03-11 08:00:00', 'baixa', 1),
+(72.4, '2025-04-12 09:00:00', 'baixa', 1),
+(71.6, '2025-04-13 10:00:00', 'baixa', 1),
+(70.8, '2025-04-14 11:00:00', 'baixa', 1),
+(73.5, '2025-04-15 12:00:00', 'baixa', 1),
+(71.2, '2025-05-16 13:00:00', 'baixa', 1),
+(70.7, '2025-05-17 14:00:00', 'baixa', 1),
+(72.3, '2025-05-18 15:00:00', 'baixa', 1),
+(71.4, '2025-05-19 16:00:00', 'baixa', 1),
+(75.6, '2025-05-20 17:00:00', 'baixa', 1),
+(88.5, '2025-03-21 08:00:00', 'alta', 1),
+(89.0, '2025-03-22 09:00:00', 'alta', 1),
+(87.0, '2025-03-23 10:00:00', 'alta', 1),
+(90.0, '2025-03-24 11:00:00', 'alta', 1),
+(89.5, '2025-03-25 12:00:00', 'alta', 1),
+(88.7, '2025-03-26 13:00:00', 'alta', 1),
+(86.0, '2025-03-27 14:00:00', 'alta', 1),
+(87.3, '2025-03-28 15:00:00', 'alta', 1),
+(88.2, '2025-03-29 16:00:00', 'alta', 1),
+(89.7, '2025-03-30 17:00:00', 'alta', 1),
+(85.0, '2025-03-31 08:00:00', 'alta', 1),
+(88.1, '2025-04-01 09:00:00', 'alta', 1),
+(89.3, '2025-04-02 10:00:00', 'alta', 1),
+(86.5, '2025-04-03 11:00:00', 'alta', 1),
+(90.0, '2025-04-04 12:00:00', 'alta', 1),
+(87.5, '2025-04-05 13:00:00', 'alta', 1),
+(88.8, '2025-04-06 14:00:00', 'alta', 1),
+(89.9, '2025-04-07 15:00:00', 'alta', 1),
+(86.2, '2025-05-08 16:00:00', 'alta', 1),
+(87.9, '2025-05-09 17:00:00', 'alta', 1),
+(88.0, '2025-05-10 08:00:00', 'alta', 1),
+(89.4, '2025-05-11 09:00:00', 'alta', 1),
+(86.9, '2025-05-12 10:00:00', 'alta', 1),
+(91.0, '2025-03-13 11:00:00', 'critico', 1),
+(92.3, '2025-03-14 12:00:00', 'critico', 1),
+(95.0, '2025-04-15 13:00:00', 'critico', 1),
+(93.4, '2025-04-16 14:00:00', 'critico', 1),
+(94.7, '2025-05-17 15:00:00', 'critico', 1),
+(96.2, '2025-05-18 16:00:00', 'critico', 1),
+(98.0, '2025-05-19 17:00:00', 'critico', 1);
+
+-- ARMAZENAMENTO
+INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
+(71.0, '2025-03-01 08:00:00', 'baixa', 41),
+(70.5, '2025-03-02 09:00:00', 'baixa', 41),
+(70.2, '2025-03-03 10:00:00', 'baixa', 41),
+(71.3, '2025-03-04 11:00:00', 'baixa', 41),
+(72.0, '2025-03-05 12:00:00', 'baixa', 41),
+(70.9, '2025-03-06 13:00:00', 'baixa', 41),
+(71.7, '2025-03-07 14:00:00', 'baixa', 41),
+(72.5, '2025-03-08 15:00:00', 'baixa', 41),
+(70.3, '2025-03-09 16:00:00', 'baixa', 41),
+(73.0, '2025-03-10 17:00:00', 'baixa', 41),
+(71.1, '2025-03-11 08:00:00', 'baixa', 41),
+(72.4, '2025-04-12 09:00:00', 'baixa', 41),
+(71.6, '2025-04-13 10:00:00', 'baixa', 41),
+(70.8, '2025-04-14 11:00:00', 'baixa', 41),
+(73.5, '2025-04-15 12:00:00', 'baixa', 41),
+(71.2, '2025-05-16 13:00:00', 'baixa', 41),
+(70.7, '2025-05-17 14:00:00', 'baixa', 41),
+(72.3, '2025-05-18 15:00:00', 'baixa', 41),
+(71.4, '2025-05-19 16:00:00', 'baixa', 41),
+(75.6, '2025-05-20 17:00:00', 'baixa', 41),
+(88.5, '2025-03-21 08:00:00', 'alta', 41),
+(89.0, '2025-03-22 09:00:00', 'alta', 41),
+(87.0, '2025-03-23 10:00:00', 'alta', 41),
+(88.2, '2025-03-24 11:00:00', 'alta', 41),
+(89.5, '2025-03-25 12:00:00', 'alta', 41),
+(88.7, '2025-03-26 13:00:00', 'alta', 41),
+(86.0, '2025-03-27 14:00:00', 'alta', 41),
+(87.3, '2025-03-28 15:00:00', 'alta', 41),
+(88.2, '2025-03-29 16:00:00', 'alta', 41),
+(89.7, '2025-03-30 17:00:00', 'alta', 41),
+(85.0, '2025-03-31 08:00:00', 'alta', 41),
+(88.1, '2025-04-01 09:00:00', 'alta', 41),
+(89.3, '2025-04-02 10:00:00', 'alta', 41),
+(86.5, '2025-04-03 11:00:00', 'alta', 41),
+(87.5, '2025-04-05 13:00:00', 'alta', 41),
+(88.8, '2025-04-06 14:00:00', 'alta', 41),
+(89.9, '2025-04-07 15:00:00', 'alta', 41),
+(86.2, '2025-05-08 16:00:00', 'alta', 41),
+(87.9, '2025-05-09 17:00:00', 'alta', 41),
+(88.0, '2025-05-10 08:00:00', 'alta', 41),
+(89.4, '2025-05-11 09:00:00', 'alta', 41),
+(86.9, '2025-05-12 10:00:00', 'alta', 41),
+(90.0, '2025-03-24 11:00:00', 'critico', 41),
+(91.0, '2025-03-13 11:00:00', 'critico', 41),
+(92.3, '2025-03-14 12:00:00', 'critico', 41),
+(95.0, '2025-04-15 13:00:00', 'critico', 41),
+(93.4, '2025-04-16 14:00:00', 'critico', 41),
+(94.7, '2025-05-17 15:00:00', 'critico', 41),
+(96.2, '2025-05-18 16:00:00', 'critico', 41),
+(98.0, '2025-05-19 17:00:00', 'critico', 41);
+
+--  CPU
+INSERT INTO captura_alerta (valorCapturado, momento, gravidade, fkMetrica) VALUES
+(75.0, '2025-03-01 08:00:00', 'baixa', 11),
+(76.5, '2025-03-02 09:00:00', 'baixa', 11),
+(76.2, '2025-03-03 10:00:00', 'baixa', 11),
+(75.3, '2025-03-04 11:00:00', 'baixa', 11),
+(76.0, '2025-03-05 12:00:00', 'baixa', 11),
+(77.9, '2025-03-06 13:00:00', 'baixa', 11),
+(79.7, '2025-03-07 14:00:00', 'baixa', 11),
+(78.5, '2025-03-08 15:00:00', 'baixa', 11),
+(79.3, '2025-04-09 16:00:00', 'baixa', 11),
+(78.0, '2025-04-10 17:00:00', 'baixa', 11),
+(79.1, '2025-04-11 08:00:00', 'baixa', 11),
+(79.4, '2025-04-12 09:00:00', 'baixa', 11),
+(78.6, '2025-04-13 10:00:00', 'baixa', 11),
+(75.8, '2025-05-14 11:00:00', 'baixa', 11),
+(79.5, '2025-05-15 12:00:00', 'baixa', 11),
+(77.2, '2025-05-16 13:00:00', 'baixa', 11),
+(77.7, '2025-05-17 14:00:00', 'baixa', 11),
+(76.3, '2025-05-18 15:00:00', 'baixa', 11),
+(76.4, '2025-05-19 16:00:00', 'baixa', 11),
+(79.6, '2025-05-20 17:00:00', 'baixa', 11),
+(89.5, '2025-03-21 08:00:00', 'alta', 11),
+(88.0, '2025-03-22 09:00:00', 'alta', 11),
+(86.0, '2025-03-23 10:00:00', 'alta', 11),
+(97.0, '2025-03-24 11:00:00', 'alta', 11),
+(89.5, '2025-03-25 12:00:00', 'alta', 11),
+(87.7, '2025-03-26 13:00:00', 'alta', 11),
+(87.0, '2025-03-27 14:00:00', 'alta', 11),
+(88.3, '2025-03-28 15:00:00', 'alta', 11),
+(89.2, '2025-03-29 16:00:00', 'alta', 11),
+(90.7, '2025-03-30 17:00:00', 'alta', 11),
+(86.0, '2025-03-31 08:00:00', 'alta', 11),
+(89.1, '2025-03-01 09:00:00', 'alta', 11),
+(90.3, '2025-03-02 10:00:00', 'alta', 11),
+(87.5, '2025-04-03 11:00:00', 'alta', 11),
+(91.0, '2025-04-04 12:00:00', 'alta', 11),
+(88.5, '2025-04-05 13:00:00', 'alta', 11),
+(89.8, '2025-04-06 14:00:00', 'alta', 11),
+(90.9, '2025-05-07 15:00:00', 'alta', 11),
+(87.2, '2025-05-08 16:00:00', 'alta', 11),
+(88.9, '2025-05-09 17:00:00', 'alta', 11),
+(89.0, '2025-05-10 08:00:00', 'alta', 11),
+(90.4, '2025-05-11 09:00:00', 'alta', 11),
+(87.9, '2025-05-12 10:00:00', 'alta', 11),
+(92.0, '2025-05-13 11:00:00', 'critico', 11),
+(93.3, '2025-03-14 12:00:00', 'critico', 11),
+(96.0, '2025-04-15 13:00:00', 'critico', 11),
+(94.4, '2025-04-16 14:00:00', 'critico', 11),
+(95.7, '2025-05-17 15:00:00', 'critico', 11),
+(97.2, '2025-05-18 16:00:00', 'critico', 11),
+(99.0, '2025-05-19 17:00:00', 'critico', 11);
+
+
+-- DROP TABLE captura_alerta;
+
 CREATE OR REPLACE VIEW detalhes_Modelo AS
-SELECT
+SELECT 
     maquina.idMaquina,
     maquina.numeroSerial,
     maquina.enderecoMac,
@@ -263,6 +490,7 @@ SELECT
     captura_alerta.valorCapturado,
     captura_alerta.momento,
     captura_alerta.gravidade
+<<<<<<< Updated upstream
 FROM
     maquina
     JOIN componente ON componente.fkMaquina = maquina.idMaquina
@@ -270,6 +498,12 @@ FROM
      JOIN captura_alerta 
         ON captura_alerta.fkMetrica = metrica.idMetrica
         AND captura_alerta.momento >= NOW() - INTERVAL 30 DAY;;
+=======
+FROM maquina
+LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
+LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
+LEFT JOIN captura_alerta ON captura_alerta.fkMetrica = metrica.idMetrica;
+>>>>>>> Stashed changes
 SELECT * from detalhes_Modelo;
 
 SELECT * FROM captura_alerta;
@@ -373,6 +607,8 @@ GROUP BY
 ORDER BY 
   c.componente, ca.gravidade;
   
+SELECT * FROM view_gravidade;
+  
 -- VIEW Endereço
 CREATE OR REPLACE VIEW view_endereco AS
 SELECT 
@@ -450,3 +686,8 @@ SELECT e.idEndereco,
     ON m.fkFilial = f.idFilial
     JOIN endereco as e
     ON f.fkEndereco = e.idEndereco;
+
+select * from maquina;
+select * from componente;
+select * from metrica;
+select * from captura_alerta;
