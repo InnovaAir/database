@@ -246,7 +246,7 @@ SELECT
     GROUP BY totem, terminal, usuario;
 
 CREATE OR REPLACE VIEW detalhes_Modelo AS
-SELECT 
+SELECT
     maquina.idMaquina,
     maquina.numeroSerial,
     maquina.enderecoMac,
@@ -263,11 +263,13 @@ SELECT
     captura_alerta.valorCapturado,
     captura_alerta.momento,
     captura_alerta.gravidade
-FROM maquina
-LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
-LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
-LEFT JOIN captura_alerta ON captura_alerta.fkMetrica = metrica.idMetrica
- WHERE captura_alerta.momento >= NOW() - INTERVAL 30 DAY;;
+FROM
+    maquina
+    LEFT JOIN componente ON componente.fkMaquina = maquina.idMaquina
+    LEFT JOIN metrica ON metrica.fkComponente = componente.idComponente
+    LEFT JOIN captura_alerta 
+        ON captura_alerta.fkMetrica = metrica.idMetrica
+        AND captura_alerta.momento >= NOW() - INTERVAL 30 DAY;;
 SELECT * from detalhes_Modelo;
 
 SELECT * FROM captura_alerta;
